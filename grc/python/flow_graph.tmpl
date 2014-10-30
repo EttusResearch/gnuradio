@@ -177,6 +177,34 @@ gr.io_signaturev($(len($io_sigs)), $(len($io_sigs)), [$(', '.join($size_strs))])
     #end if
 #end for
 ########################################################
+##Create RFNoC-Connections
+########################################################
+<%
+def get_rfnoc_port_index(block, portname, porttype="source"):
+    if porttype == "source":
+        port_key_list = [x.get_key() for x in block.get_sources() if x.get_type() == 'rfnoc']
+    else:
+        port_key_list = [x.get_key() for x in block.get_sinks()   if x.get_type() == 'rfnoc']
+    return port_key_list.index(portname)
+    #return (port_key_list, portname)
+
+%>
+#if $rfnoc_connections
+
+        $DIVIDER
+        # RFNoC Connections
+        $DIVIDER
+#end if
+#for $con in $rfnoc_connections
+    #set $source = $con.get_source().get_parent().get_id()
+    #set $source_port = $get_rfnoc_port_index($con.get_source().get_parent(), $con.get_source().get_key(), 'source')
+    #set $sink = $con.get_sink().get_parent().get_id()
+    #set $sink_port = $get_rfnoc_port_index($con.get_sink().get_parent(), $con.get_sink().get_key(), 'sink')
+        self.device3.connect(self.${source}.get_block_id(), $source_port, self.${sink}.get_block_id(), $sink_port)
+#end for
+
+
+########################################################
 ##Create Connections
 ##  The port name should be the id of the parent block.
 ##  However, port names for IO pads should be self.

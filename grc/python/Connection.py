@@ -34,6 +34,9 @@ class Connection(_Connection, _GUIConnection):
     def is_message(self):
         return self.get_source().get_type() == self.get_sink().get_type() == 'message'
 
+    def is_rfnoc(self):
+        return self.get_source().get_type() == self.get_sink().get_type() == 'rfnoc'
+
     def is_bus(self):
         return self.get_source().get_type() == self.get_sink().get_type() == 'bus'
 

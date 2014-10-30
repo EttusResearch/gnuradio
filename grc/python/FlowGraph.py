@@ -73,7 +73,7 @@ class FlowGraph(_FlowGraph, _GUIFlowGraph):
             'out': self.get_pad_sinks(),
         }[direction]
         # we only want stream ports
-        sorted_pads = filter(lambda b: b.get_param('type').get_evaluated() != 'message', sorted_pads);
+        sorted_pads = filter(lambda b: not b.get_param('type').get_evaluated() in ('message', 'rfnoc'), sorted_pads);
         expanded_pads = [];
         for i in sorted_pads:
             for j in range(i.get_param('num_streams').get_evaluated()):

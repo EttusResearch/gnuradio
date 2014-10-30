@@ -154,6 +154,7 @@ class Connection(Element):
         # make message connections dashed (no areas here)
         normal_line_style = gc.line_style
         if source.get_type() == "message": gc.line_style = gtk.gdk.LINE_ON_OFF_DASH
+        if source.get_type() == "rfnoc": gc.line_style = gtk.gdk.LINE_ON_OFF_DASH
         Element.draw(self, gc, window, bg_color=None, border_color=border_color)
         gc.line_style = normal_line_style  # restore line style
         #draw arrow on sink port

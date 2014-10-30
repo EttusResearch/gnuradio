@@ -28,6 +28,7 @@ from Constants import \
 import convert_hier
 from .. gui import Messages
 
+import pdb
 
 class Generator(object):
 
@@ -109,6 +110,7 @@ This is usually undesired. Consider removing the throttle block.''')
         Returns:
             a string of python code
         """
+        #pdb.set_trace()
         title = self._flow_graph.get_option('title') or self._flow_graph.get_option('id').replace('_', ' ').title()
         imports = self._flow_graph.get_imports()
         variables = self._flow_graph.get_variables()
@@ -129,9 +131,14 @@ This is usually undesired. Consider removing the throttle block.''')
         #list of regular blocks (all blocks minus the special ones)
         blocks = filter(lambda b: b not in (imports + parameters), blocks)
         #list of connections where each endpoint is enabled
-        connections = filter(lambda c: not (c.is_bus() or c.is_msg() or c.is_message()), self._flow_graph.get_enabled_connections())
+        connections = filter(lambda c: not (c.is_bus() or c.is_msg() or c.is_message() or c.is_rfnoc()), self._flow_graph.get_enabled_connections())
         messages = filter(lambda c: c.is_msg(), self._flow_graph.get_enabled_connections())
         messages2 = filter(lambda c: c.is_message(), self._flow_graph.get_enabled_connections())
+        rfnoc_connections = filter(lambda c: c.is_rfnoc(), self._flow_graph.get_enabled_connections())
+        if len(rfnoc_connections):
+            print '<<<<<<<<<RFNOC>>>>>>>>>>>>>'
+            print rfnoc_connections[0].get_source().get_parent().get_id()
+            print '<<<<<<<<<RFNOC>>>>>>>>>>>>>'
         #list of variable names
         var_ids = [var.get_id() for var in parameters + variables]
         #prepend self.
@@ -156,6 +163,7 @@ This is usually undesired. Consider removing the throttle block.''')
                         'monitors': monitors,
             'blocks': blocks,
             'connections': connections,
+            'rfnoc_connections': rfnoc_connections,
             'messages': messages,
             'messages2': messages2,
             'generate_options': self._generate_options,
