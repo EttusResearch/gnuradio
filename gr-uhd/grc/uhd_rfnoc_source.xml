@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<block>
+	<name>UHD: RFNOC Source</name>
+	<key>uhd_rfnoc_source</key>
+	<throttle>1</throttle>
+	<import>from gnuradio import uhd</import>
+	<import>import time</import>
+	<make>uhd.rfnoc_source(
+	$dev_addr,
+	uhd.stream_args(
+		cpu_format="$type",
+		otw_format="sc16",
+		args=$stream_args,
+	),
+	$ce_select,
+	$register_settings,
+	$spp
+)
+self.$(id).set_samp_rate($samp_rate)
+self.$(id).set_center_freq($center_freq, 0)
+self.$(id).set_antenna($ant, 0)
+self.$(id).set_gain($gain, 0)
+	</make>
+	<callback>set_samp_rate($samp_rate)</callback>
+	<callback>set_center_freq($center_freq, 0)</callback>
+	<callback>set_gain($gain, 0)</callback>
+	<callback>set_antenna($ant, 0)</callback>
+	<callback>set_bandwidth($bw, 0)</callback>
+	<param>
+		<name>Block IDs</name>
+		<key>block_id</key>
+		<value>"CE"</value>
+		<type>string</type>
+	</param>
+	<param>
+		<name>Output Type</name>
+		<key>type</key>
+		<type>enum</type>
+		<option>
+			<name>Complex float32</name>
+			<key>fc32</key>
+			<opt>type:fc32</opt>
+		</option>
+		<option>
+			<name>Complex int16</name>
+			<key>sc16</key>
+			<opt>type:sc16</opt>
+		</option>
+	</param>
+	<param>
+		<name>Wire Format</name>
+		<key>otw</key>
+		<value></value>
+		<type>string</type>
+		<hide>
+			#if $otw()
+				none
+			#else
+				part
+			#end if
+		</hide>
+		<option>
+			<name>Automatic</name>
+			<key></key>
+		</option>
+		<option>
+			<name>Complex int16</name>
+			<key>sc16</key>
+		</option>
+		<option>
+			<name>Complex int8</name>
+			<key>sc8</key>
+		</option>
+	</param>
+	<param>
+		<name>Stream args</name>
+		<key>stream_args</key>
+		<value></value>
+		<type>string</type>
+		<hide>
+			#if $stream_args()
+				none
+			#else
+				part
+			#end if
+		</hide>
+		<option>
+			<name>peak=0.003906</name>
+			<key>peak=0.003906</key>
+		</option>
+	</param>
+	<param>
+		<name>Device Address</name>
+		<key>dev_addr</key>
+		<value>""</value>
+		<type>string</type>
+		<hide>
+			#if $dev_addr()
+				none
+			#else
+				part
+			#end if
+		</hide>
+	</param>
+	<param>
+		<name>Mb0: Subdev Spec</name>
+		<key>sd_spec0</key>
+		<value></value>
+		<type>string</type>
+		<hide>
+			#if not $num_mboards() > 0
+				all
+			#elif $sd_spec0()
+				none
+			#else
+				part
+			#end if
+		</hide>
+	</param>
+	<param>
+		<name>Samp Rate (Sps)</name>
+		<key>samp_rate</key>
+		<value>samp_rate</value>
+		<type>real</type>
+	</param>
+	<param>
+		<name>Ch0: Center Freq (Hz)</name>
+		<key>center_freq</key>
+		<value>0</value>
+		<type>real</type>
+	</param>
+	<param>
+		<name>Ch0: Gain (dB)</name>
+		<key>gain</key>
+		<value>0</value>
+		<type>real</type>
+	</param>
+	<param>
+		<name>Ch0: Antenna</name>
+		<key>ant</key>
+		<value></value>
+		<type>string</type>
+	</param>
+	<param>
+		<name>Ch0: Bandwidth (Hz)</name>
+		<key>bw</key>
+		<value>0</value>
+		<type>real</type>
+	</param>
+	<param>
+		<name>Vector Length</name>
+		<key>vlen</key>
+		<value>1</value>
+		<type>int</type>
+	</param>
+	<param>
+		<name>Register settings (9, 10, ...)</name>
+		<key>register_settings</key>
+		<value>(,)</value>
+		<type>raw</type>
+	</param>
+	<source>
+		<name>out</name>
+		<type>$type.type</type>
+		<vlen>$vlen</vlen>
+	</source>
+	<doc>
+		Select ce0, ce1 or ce2 and registers.
+	</doc>
+</block>

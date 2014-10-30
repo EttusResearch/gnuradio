@@ -40,7 +40,15 @@ add_custom_target(uhd_grc_xml_blocks ALL DEPENDS ${xml_blocks})
 install(FILES
     ${xml_blocks}
     uhd_amsg_source.xml
+    uhd_rfnoc_source.xml
     uhd_block_tree.xml
+    uhd_device3.xml
+    uhd_rfnoc_streamer.xml
+    uhd_rfnoc_radio.xml
+    uhd_rfnoc_adder.xml
+    uhd_rfnoc_fifo.xml
+    uhd_rfnoc_fir.xml
+    uhd_rfnoc_fft.xml
     DESTINATION ${GRC_BLOCKS_DIR}
     COMPONENT "uhd_python"
 )

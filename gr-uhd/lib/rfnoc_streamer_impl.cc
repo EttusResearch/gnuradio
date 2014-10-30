@@ -1,0 +1,422 @@
+/* -*- c++ -*- */
+/* 
+ * Copyright 2014 Free Software Foundation, Inc.
+ * 
+ * This file is part of GNU Radio
+ * 
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ * 
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "rfnoc_streamer_impl.h"
+#include <gnuradio/io_signature.h>
+#include <gnuradio/block_detail.h>
+#include <uhd/usrp/rfnoc/rx_block_ctrl_base.hpp>
+#include <uhd/usrp/rfnoc/tx_block_ctrl_base.hpp>
+#include <uhd/usrp/rfnoc/fir_block_ctrl.hpp>
+#include <uhd/convert.hpp>
+#include <iostream>
+#include <cassert>
+
+namespace gr {
+  namespace uhd {
+
+    rfnoc_streamer::sptr
+    rfnoc_streamer::make(
+        const device3::sptr &dev,
+        const std::string &block_id,
+        const ::uhd::stream_args_t &stream_args,
+        const int ninputs,
+        const int noutputs,
+        bool align_inputs,
+        bool align_outputs
+    ) {
+      return gnuradio::get_initial_sptr(
+          new rfnoc_streamer_impl(
+            dev, block_id, stream_args, ninputs, noutputs, align_inputs, align_outputs
+          )
+      );
+    }
+
+
+    rfnoc_streamer_impl::rfnoc_streamer_impl(
+        const device3::sptr &dev,
+        const std::string &block_id,
+        const ::uhd::stream_args_t &stream_args,
+        const int ninputs,
+        const int noutputs,
+        bool align_inputs,
+        bool align_outputs
+    ) : gr::block("uhd_rfnoc_streamer",
+              // These IO signatures will be overwritten in the constructor
+              gr::io_signature::make(0, ninputs, sizeof(gr_complex)),
+              gr::io_signature::make(0, noutputs, sizeof(gr_complex))),
+      _stream_args(stream_args),
+      _ninputs(ninputs),
+      _noutputs(noutputs),
+      _align_inputs(align_inputs),
+      _align_outputs(align_outputs)
+    {
+      _dev = dev->get_device();
+      _blk_ctrl = dev->get_device()->get_device3()->find_block_ctrl(block_id);
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting args on %s (%s)") % _blk_ctrl->get_block_id() % _stream_args.args.to_string()));
+      _blk_ctrl->set_args(stream_args.args);
+      _stream_args.args["block_id"] = _blk_ctrl->get_block_id().get();
+
+      int itemsize = sizeof(gr_complex);
+      if (_stream_args.cpu_format == "sc16") {
+        itemsize = 2 * 2;
+      }
+      ::uhd::rfnoc::stream_sig_t in_sig = _blk_ctrl->get_input_signature(0);
+      _in_vlen = (in_sig.vlen == 0) ? 1 : in_sig.vlen;
+      set_input_signature(gr::io_signature::make(0, ninputs, itemsize * _in_vlen));
+      ::uhd::rfnoc::stream_sig_t out_sig = _blk_ctrl->get_output_signature(0);
+      _out_vlen = (out_sig.vlen == 0) ? 1 : out_sig.vlen;
+      set_output_signature(gr::io_signature::make(0, noutputs, itemsize * _out_vlen));
+
+      set_tag_propagation_policy(TPP_DONT);
+
+      if (_align_inputs || _align_outputs) {
+        throw std::runtime_error("Alignment of inputs and outputs is not yet supported.\n");
+      }
+    }
+
+
+    rfnoc_streamer_impl::~rfnoc_streamer_impl()
+    {
+    }
+
+
+    int
+    rfnoc_streamer_impl::general_work (
+        int noutput_items,
+        gr_vector_int &ninput_items,
+        gr_vector_const_void_star &input_items,
+        gr_vector_void_star &output_items
+    ) {
+      boost::recursive_mutex::scoped_lock lock(d_mutex);
+
+      // TODO put these in separate threads
+      if (input_items.size()) {
+        if (_align_outputs) {
+          work_tx_a(ninput_items, input_items);
+        } else {
+          work_tx_u(ninput_items, input_items);
+        }
+      }
+
+      if (output_items.size()) {
+        if (_align_outputs) {
+          work_rx_a(noutput_items, output_items);
+        } else {
+          work_rx_u(noutput_items, output_items);
+        }
+      }
+
+      // If this is a sink, we return the number of consumed items, like a
+      // well-behaved little sink block.
+      return WORK_CALLED_PRODUCE;
+    }
+
+    int
+    rfnoc_streamer_impl::work_tx_a(
+        gr_vector_int &ninput_items,
+        gr_vector_const_void_star &input_items
+    ) {
+      throw std::runtime_error("work_tx_a");
+      return 0;
+    }
+
+    int
+    rfnoc_streamer_impl::work_tx_u(
+        gr_vector_int &ninput_items,
+        gr_vector_const_void_star &input_items
+    ) {
+      assert(input_items.size() == _tx_stream.size());
+
+      // In every loop iteration, this will point to the relevant buffer
+      gr_vector_const_void_star buff_ptr(1);
+
+      for (size_t i = 0; i < _tx_stream.size(); i++) {
+        buff_ptr[0] = input_items[i];
+        const size_t num_sent = _tx_stream[i]->send(
+            buff_ptr,
+            std::min(_tx_stream[i]->get_max_num_samps(), ninput_items[i] * _in_vlen),
+            _tx_metadata,
+            1.0
+        );
+        consume(i, num_sent / _in_vlen);
+      }
+
+      return WORK_CALLED_PRODUCE;
+    }
+
+    int
+    rfnoc_streamer_impl::work_rx_a(
+        int noutput_items,
+        gr_vector_void_star &output_items
+    ) {
+      throw std::runtime_error("work_rx_a");
+      return 0;
+    }
+
+    int
+    rfnoc_streamer_impl::work_rx_u(
+        int noutput_items,
+        gr_vector_void_star &output_items
+    ) {
+      assert(_rx_stream.size() == output_items.size());
+
+      // In every loop iteration, this will point to the relevant buffer
+      gr_vector_void_star buff_ptr(1);
+
+      for (size_t i = 0; i < _rx_stream.size(); i++) {
+        buff_ptr[0] = output_items[i];
+        size_t num_samps = _rx_stream[i]->recv(
+            buff_ptr,
+            std::min(_rx_stream[i]->get_max_num_samps(), noutput_items * _out_vlen),
+            _rx_metadata, 0.1
+        );
+        produce(i, num_samps / _out_vlen);
+
+        switch(_rx_metadata.error_code) {
+          case ::uhd::rx_metadata_t::ERROR_CODE_NONE:
+            break;
+
+          case ::uhd::rx_metadata_t::ERROR_CODE_TIMEOUT:
+            //its ok to timeout, perhaps the user is doing finite streaming
+            std::cout << "timeout on chan " << i << std::endl;
+            break;
+
+          case ::uhd::rx_metadata_t::ERROR_CODE_OVERFLOW:
+            // Not much we can do about overruns here
+            std::cout << "overrun on chan " << i << std::endl;
+            break;
+
+          default:
+            std::cout << boost::format("UHD source block got error code 0x%x")
+              % _rx_metadata.error_code << std::endl;
+        }
+      }
+
+      return WORK_CALLED_PRODUCE;
+    }
+
+    bool rfnoc_streamer_impl::start()
+    {
+      boost::recursive_mutex::scoped_lock lock(d_mutex);
+
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("start()")));
+
+      size_t ninputs = detail()->ninputs();
+      size_t noutputs = detail()->noutputs();
+
+      //////////////////// TX ///////////////////////////////////////////////////////////////
+      // Setup TX streamer.
+      if (_align_inputs && _tx_stream.empty()) {
+        // Make aligned streamer
+        // tbw
+
+      } else if (!_align_inputs && (_tx_stream.size() != ninputs)) {
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating streamers for %d inputs.") % ninputs));
+        // Destroy the old streamers, if any:
+        _tx_stream.clear();
+        // Get a block control for the tx side:
+        ::uhd::rfnoc::tx_block_ctrl_base::sptr tx_blk_ctrl =
+            boost::dynamic_pointer_cast< ::uhd::rfnoc::tx_block_ctrl_base >(_blk_ctrl);
+        if (tx_blk_ctrl) {
+          // OK, we have a tx-capable block. Create the streamer:
+          for (size_t i = 0; i < size_t(ninputs); i++) {
+            _stream_args.channels = std::vector<size_t>(1, i);
+            GR_LOG_DEBUG(d_debug_logger, str(boost::format("creating tx streamer with: %s") % _stream_args.args.to_string()));
+            ::uhd::tx_streamer::sptr tx_stream = _dev->get_tx_stream(_stream_args);
+            if (tx_stream) {
+              _tx_stream.push_back(tx_stream);
+            }
+          }
+        } else {
+          GR_LOG_FATAL(d_logger, str(boost::format("Not a tx_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
+          return false;
+        }
+        if (_tx_stream.size() != size_t(ninputs)) {
+          GR_LOG_FATAL(d_logger, str(boost::format("Can't create tx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+          return false;
+        }
+      }
+
+      _tx_metadata.start_of_burst = false;
+      _tx_metadata.end_of_burst = false;
+      _tx_metadata.has_time_spec = false;
+
+      //////////////////// RX ///////////////////////////////////////////////////////////////
+      // Setup RX streamer
+      if (_align_outputs && _rx_stream.empty()) {
+        // Make aligned streamer
+        // tbw
+        assert(false);
+      } else if (!_align_outputs && (_rx_stream.size() != noutputs)) {
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating streamers for %d outputs.") % noutputs));
+        ::uhd::rfnoc::rx_block_ctrl_base::sptr rx_blk_ctrl =
+            boost::dynamic_pointer_cast< ::uhd::rfnoc::rx_block_ctrl_base >(_blk_ctrl);
+        if (rx_blk_ctrl) {
+          // OK, we have an rx-capable block. Create the streamer:
+          for (size_t i = 0; i < noutputs; i++) {
+            _stream_args.channels = std::vector<size_t>(1, i);
+            GR_LOG_DEBUG(d_debug_logger, str(boost::format("creating rx streamer with: %s") % _stream_args.args.to_string()));
+            ::uhd::rx_streamer::sptr rx_stream = _dev->get_rx_stream(_stream_args);
+            if (rx_stream) {
+              _rx_stream.push_back(rx_stream);
+            }
+          }
+        } else {
+          throw std::runtime_error(str(boost::format("Not an rx_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
+        }
+        if (_rx_stream.size() != noutputs) {
+          throw std::runtime_error(str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+        }
+        ::uhd::stream_cmd_t stream_cmd(::uhd::stream_cmd_t::STREAM_MODE_START_CONTINUOUS);
+        stream_cmd.stream_now = true;
+        for (size_t i = 0; i < _rx_stream.size(); i++) {
+          _rx_stream[i]->issue_stream_cmd(stream_cmd);
+        }
+      }
+
+      return true;
+    }
+
+    bool rfnoc_streamer_impl::stop()
+    {
+      boost::recursive_mutex::scoped_lock lock(d_mutex);
+
+      // TX: Send EOB
+      _tx_metadata.start_of_burst = false;
+      _tx_metadata.end_of_burst = true;
+      _tx_metadata.has_time_spec = false;
+      if (_align_inputs) {
+        _tx_stream[0]->send(gr_vector_const_void_star(_tx_stream[0]->get_num_channels()), 0, _tx_metadata, 1.0);
+      } else {
+        for (size_t i = 0; i < _tx_stream.size(); i++) {
+          // Always 1 channel per streamer in this case
+          _tx_stream[i]->send(gr_vector_const_void_star(1), 0, _tx_metadata, 1.0);
+        }
+      }
+
+      // RX: Stop streaming and empty the buffers
+      for (size_t i = 0; i < _rx_stream.size(); i++) {
+        _rx_stream[i]->issue_stream_cmd(::uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS);
+        flush(i);
+      }
+
+      return true;
+    }
+
+    void rfnoc_streamer_impl::flush(size_t streamer_index)
+    {
+      const size_t nbytes = 4096;
+      size_t _nchan = 1;
+      if (_align_outputs) {
+        _nchan = _rx_stream[0]->get_num_channels();
+      }
+      std::vector<std::vector<char> > buffs(_nchan, std::vector<char>(nbytes));
+      gr_vector_void_star outputs;
+      for(size_t i = 0; i < _nchan; i++) {
+        outputs.push_back(&buffs[i].front());
+      }
+      while(true) {
+        const size_t bpi = ::uhd::convert::get_bytes_per_item(_stream_args.cpu_format);
+        _rx_stream[streamer_index]->recv(outputs, nbytes/bpi, _rx_metadata, 0.0);
+        if(_rx_metadata.error_code != ::uhd::rx_metadata_t::ERROR_CODE_NONE) {
+          break;
+        }
+      }
+    }
+
+    void
+    rfnoc_streamer_impl::set_register(size_t reg, boost::uint32_t value)
+    {
+      _blk_ctrl->sr_write(reg, value);
+    }
+
+    void
+    rfnoc_streamer_impl::set_option(const std::string &key, const std::string &val)
+    {
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting rfnoc option on %s %s==%s") % _blk_ctrl->get_block_id() % key % val));
+      // *throws up* this should not be a hardcoded list of options TODO
+      if (_blk_ctrl->get_block_id().get_block_name() == "Radio") {
+        // TODO handle chans?
+        //size_t chan = _blk_ctrl->get_block_id().get_block_count();
+        if (key == "rx_freq") {
+          double freq = boost::lexical_cast<double>(val);
+          _dev->set_rx_freq(freq);
+        }
+        else if (key == "tx_freq") {
+          double freq = boost::lexical_cast<double>(val);
+          _dev->set_tx_freq(freq);
+        }
+        else if (key == "rx_ant") {
+          _dev->set_tx_antenna(val);
+        }
+        else if (key == "rx_ant") {
+          _dev->set_rx_antenna(val);
+        }
+        else if (key == "rx_gain") {
+          double gain = boost::lexical_cast<double>(val);
+          _dev->set_rx_gain(gain);
+        }
+        else if (key == "tx_gain") {
+          double gain = boost::lexical_cast<double>(val);
+          _dev->set_tx_gain(gain);
+        }
+        else if (key == "rx_rate") {
+          double rate = boost::lexical_cast<double>(val);
+          _dev->set_rx_rate(rate);
+        }
+        else if (key == "tx_rate") {
+          double rate = boost::lexical_cast<double>(val);
+          _dev->set_tx_rate(rate);
+        }
+      }
+    }
+
+    void rfnoc_streamer_impl::set_taps(const std::vector<int> &taps)
+    {
+      if (_blk_ctrl->get_block_id().get_block_name() != "FIR") {
+        GR_LOG_ALERT(d_debug_logger, str(boost::format("Calling set_taps() on a non-FIR block!")));
+        return;
+      }
+
+      ::uhd::rfnoc::fir_block_ctrl::sptr fir_ctrl =
+              boost::dynamic_pointer_cast< ::uhd::rfnoc::fir_block_ctrl >(_blk_ctrl);
+      if (not fir_ctrl) {
+        GR_LOG_ALERT(d_debug_logger, str(boost::format("Calling set_taps() on a non-FIR block!")));
+        return;
+      }
+
+      fir_ctrl->set_taps(taps);
+    }
+
+    std::string
+    rfnoc_streamer_impl::get_block_id()
+    {
+      return _blk_ctrl->get_block_id().get();
+    }
+
+  } /* namespace uhd */
+} /* namespace gr */
+

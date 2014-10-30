@@ -11,5 +11,13 @@
 		<block>uhd_usrp_source</block>
 		<block>uhd_usrp_sink</block>
 		<block>uhd_amsg_source</block>
+		<block>uhd_device3</block>
+		<block>uhd_rfnoc_source</block>
+		<block>uhd_rfnoc_streamer</block>
+		<block>uhd_rfnoc_streamer_radio</block>
+		<block>uhd_rfnoc_streamer_fifo</block>
+		<block>uhd_rfnoc_streamer_fft</block>
+		<block>uhd_rfnoc_streamer_fir</block>
+		<block>uhd_rfnoc_streamer_adder</block>
 	</cat>
 </cat>
