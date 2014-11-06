@@ -297,6 +297,7 @@ namespace gr {
         }
       }
 
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("rx antenna is: %s") % _dev->get_rx_antenna()));
       return true;
     }
 
@@ -369,7 +370,7 @@ namespace gr {
           double freq = boost::lexical_cast<double>(val);
           _dev->set_tx_freq(freq);
         }
-        else if (key == "rx_ant") {
+        else if (key == "tx_ant") {
           _dev->set_tx_antenna(val);
         }
         else if (key == "rx_ant") {
