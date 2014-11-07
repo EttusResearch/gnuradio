@@ -55,6 +55,7 @@ namespace gr {
       virtual void set_option(const std::string &key, const std::string &val) = 0;
       virtual std::string get_block_id() = 0;
       virtual void set_taps(const std::vector<int> &taps) = 0;
+      virtual void set_window(const std::vector<int> &coeffs) = 0;
     };
 
   } // namespace uhd
