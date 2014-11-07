@@ -210,8 +210,8 @@ namespace gr {
             break;
 
           default:
-            std::cout << boost::format("UHD source block got error code 0x%x")
-              % _rx_metadata.error_code << std::endl;
+            std::cout << boost::format("RFNoC Streamer block received error %s (Code: 0x%x)")
+              % _rx_metadata.strerror() % _rx_metadata.error_code << std::endl;
         }
       }
 
@@ -226,6 +226,7 @@ namespace gr {
 
       size_t ninputs = detail()->ninputs();
       size_t noutputs = detail()->noutputs();
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("ninputs == %d noutputs == %d") % ninputs % noutputs));
 
       //////////////////// TX ///////////////////////////////////////////////////////////////
       // Setup TX streamer.
@@ -234,7 +235,7 @@ namespace gr {
         // tbw
 
       } else if (!_align_inputs && (_tx_stream.size() != ninputs)) {
-        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating streamers for %d inputs.") % ninputs));
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating tx streamers for %d inputs.") % ninputs));
         // Destroy the old streamers, if any:
         _tx_stream.clear();
         // Get a block control for the tx side:
@@ -271,7 +272,7 @@ namespace gr {
         // tbw
         assert(false);
       } else if (!_align_outputs && (_rx_stream.size() != noutputs)) {
-        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating streamers for %d outputs.") % noutputs));
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating rx streamers for %d outputs.") % noutputs));
         ::uhd::rfnoc::rx_block_ctrl_base::sptr rx_blk_ctrl =
             boost::dynamic_pointer_cast< ::uhd::rfnoc::rx_block_ctrl_base >(_blk_ctrl);
         if (rx_blk_ctrl) {
