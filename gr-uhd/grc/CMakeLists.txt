@@ -49,6 +49,7 @@ install(FILES
     uhd_rfnoc_fifo.xml
     uhd_rfnoc_fir.xml
     uhd_rfnoc_fft.xml
+    uhd_rfnoc_window.xml
     DESTINATION ${GRC_BLOCKS_DIR}
     COMPONENT "uhd_python"
 )

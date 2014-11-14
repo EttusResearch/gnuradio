@@ -30,6 +30,7 @@
 #include <uhd/usrp/rfnoc/rx_block_ctrl_base.hpp>
 #include <uhd/usrp/rfnoc/tx_block_ctrl_base.hpp>
 #include <uhd/usrp/rfnoc/fir_block_ctrl.hpp>
+#include <uhd/usrp/rfnoc/window_block_ctrl.hpp>
 #include <uhd/convert.hpp>
 #include <iostream>
 #include <cassert>
@@ -415,6 +416,23 @@ namespace gr {
       }
 
       fir_ctrl->set_taps(taps);
+    }
+
+    void rfnoc_streamer_impl::set_window(const std::vector<int> &coeffs)
+    {
+      if (_blk_ctrl->get_block_id().get_block_name() != "Window") {
+        std::cout << "[GR] Calling set_window() on a non-Window block!" << std::endl;
+        return;
+      }
+
+      ::uhd::rfnoc::window_block_ctrl::sptr window_ctrl =
+              boost::dynamic_pointer_cast< ::uhd::rfnoc::window_block_ctrl >(_blk_ctrl);
+      if (not window_ctrl) {
+        std::cout << "[GR] Calling set_window() on a non-Window block!" << std::endl;
+        return;
+      }
+
+      window_ctrl->set_window(coeffs);
     }
 
     std::string

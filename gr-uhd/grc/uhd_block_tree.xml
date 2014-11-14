@@ -19,5 +19,6 @@
 		<block>uhd_rfnoc_streamer_fft</block>
 		<block>uhd_rfnoc_streamer_fir</block>
 		<block>uhd_rfnoc_streamer_adder</block>
+		<block>uhd_rfnoc_streamer_window</block>
 	</cat>
 </cat>

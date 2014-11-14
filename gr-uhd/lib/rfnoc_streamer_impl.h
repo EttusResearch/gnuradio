@@ -50,6 +50,7 @@ namespace gr {
       std::string get_block_id();
 
       void set_taps(const std::vector<int> &taps);
+      void set_window(const std::vector<int> &coeff);
 
       int general_work(
           int noutput_items,
