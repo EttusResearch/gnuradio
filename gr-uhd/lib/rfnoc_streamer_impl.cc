@@ -77,6 +77,11 @@ namespace gr {
       _dev = dev->get_device();
       _blk_ctrl = dev->get_device()->get_device3()->find_block_ctrl(block_id);
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting args on %s (%s)") % _blk_ctrl->get_block_id() % _stream_args.args.to_string()));
+      int gr_vlen = _stream_args.args.cast<int>("gr_vlen", 1);
+      if (_stream_args.args.has_key("gr_vlen")) {
+        _stream_args.args.pop("gr_vlen");
+      }
+
       _blk_ctrl->set_args(stream_args.args);
       _stream_args.args["block_id"] = _blk_ctrl->get_block_id().get();
 
@@ -86,11 +91,20 @@ namespace gr {
       }
       ::uhd::rfnoc::stream_sig_t in_sig = _blk_ctrl->get_input_signature(0);
       _in_vlen = (in_sig.vlen == 0) ? 1 : in_sig.vlen;
-      set_input_signature(gr::io_signature::make(0, ninputs, itemsize * _in_vlen));
       ::uhd::rfnoc::stream_sig_t out_sig = _blk_ctrl->get_output_signature(0);
       _out_vlen = (out_sig.vlen == 0) ? 1 : out_sig.vlen;
-      set_output_signature(gr::io_signature::make(0, noutputs, itemsize * _out_vlen));
 
+      if (gr_vlen != 1) {
+        if (_out_vlen != 1 || _in_vlen != 1) {
+          throw std::runtime_error("Can't set gr_vlen if underlying RFNoC block already has a vector length.\n");
+        }
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Found setting gr_vlen == %d") % gr_vlen));
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("If stuff doesn't work, remove this setting again!")));
+        _in_vlen = _out_vlen = gr_vlen;
+      }
+
+      set_input_signature(gr::io_signature::make(0, ninputs, itemsize * _in_vlen));
+      set_output_signature(gr::io_signature::make(0, noutputs, itemsize * _out_vlen));
       set_tag_propagation_policy(TPP_DONT);
 
       if (_align_inputs || _align_outputs) {
