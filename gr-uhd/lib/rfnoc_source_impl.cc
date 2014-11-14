@@ -527,7 +527,7 @@ namespace gr {
       boost::recursive_mutex::scoped_lock lock(d_mutex);
       if(not _rx_stream){
         _dev->clear_channels();
-        _dev->set_channel( ::uhd::rfnoc::block_id_t(_stream_args.args["block_id"]) );
+        _dev->set_rx_channel( ::uhd::rfnoc::block_id_t(_stream_args.args["block_id"]) );
 
         if (_blk_ctrls.size() > 1) {
           std::cout << "[GR] Connecting blocks..." << std::endl;
