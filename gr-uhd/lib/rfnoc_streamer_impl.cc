@@ -155,9 +155,11 @@ namespace gr {
 
       for (size_t i = 0; i < _tx_stream.size(); i++) {
         buff_ptr[0] = input_items[i];
+        //size_t num_vectors_to_send = std::min(_tx_stream[i]->get_max_num_samps() / _out_vlen, size_t(ninput_items[i]));
+        size_t num_vectors_to_send = ninput_items[i];
         const size_t num_sent = _tx_stream[i]->send(
             buff_ptr,
-            std::min(_tx_stream[i]->get_max_num_samps(), ninput_items[i] * _in_vlen),
+            num_vectors_to_send * _in_vlen,
             _tx_metadata,
             1.0
         );
@@ -188,9 +190,11 @@ namespace gr {
 
       for (size_t i = 0; i < _rx_stream.size(); i++) {
         buff_ptr[0] = output_items[i];
+        //size_t num_vectors_to_recv = std::min(_rx_stream[i]->get_max_num_samps() / _out_vlen, size_t(noutput_items));
+        size_t num_vectors_to_recv = noutput_items;
         size_t num_samps = _rx_stream[i]->recv(
             buff_ptr,
-            std::min(_rx_stream[i]->get_max_num_samps(), noutput_items * _out_vlen),
+            num_vectors_to_recv * _out_vlen,
             _rx_metadata, 0.1
         );
         produce(i, num_samps / _out_vlen);
