@@ -9,7 +9,7 @@
     uhd.stream_args(
         cpu_format="fc32", \# TODO: This must be made an option
         otw_format="sc16",
-        args="gr_vlen={0}".format($grvlen),
+        args="gr_vlen={0},{1}".format($grvlen, "" if $grvlen == 1 else "spp={0}".format($grvlen)),
     )
 )</make>
 
