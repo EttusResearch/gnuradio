@@ -38,6 +38,11 @@
 namespace gr {
   namespace uhd {
 
+    size_t rfnoc_streamer_impl::_n_streamers = 0;
+    ::uhd::reusable_barrier rfnoc_streamer_impl::_tx_barrier;
+    ::uhd::reusable_barrier rfnoc_streamer_impl::_rx_barrier;
+    boost::recursive_mutex rfnoc_streamer_impl::s_setup_mutex;
+
     rfnoc_streamer::sptr
     rfnoc_streamer::make(
         const device3::sptr &dev,
@@ -74,6 +79,14 @@ namespace gr {
       _align_inputs(align_inputs),
       _align_outputs(align_outputs)
     {
+      {
+        boost::recursive_mutex::scoped_lock lock(s_setup_mutex);
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting up RFNoC streamer #%d") % _n_streamers));
+        _n_streamers++;
+        _tx_barrier.resize(_n_streamers);
+        _rx_barrier.resize(_n_streamers);
+      }
+
       _dev = dev->get_device();
       _blk_ctrl = dev->get_device()->get_device3()->find_block_ctrl(block_id);
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting args on %s (%s)") % _blk_ctrl->get_block_id() % _stream_args.args.to_string()));
@@ -284,6 +297,9 @@ namespace gr {
       _tx_metadata.end_of_burst = false;
       _tx_metadata.has_time_spec = false;
 
+      // Wait for all RFNoC streamers to have set up their tx streamers
+      _tx_barrier.wait();
+
       //////////////////// RX ///////////////////////////////////////////////////////////////
       // Setup RX streamer
       if (_align_outputs && _rx_stream.empty()) {
@@ -310,6 +326,14 @@ namespace gr {
         if (_rx_stream.size() != noutputs) {
           throw std::runtime_error(str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
         }
+      }
+
+
+      // Wait for all RFNoC streamers to have set up their rx streamers
+      _rx_barrier.wait();
+
+      // Start the streamers
+      if (!_rx_stream.empty()) {
         ::uhd::stream_cmd_t stream_cmd(::uhd::stream_cmd_t::STREAM_MODE_START_CONTINUOUS);
         stream_cmd.stream_now = true;
         for (size_t i = 0; i < _rx_stream.size(); i++) {
@@ -337,6 +361,8 @@ namespace gr {
           _tx_stream[i]->send(gr_vector_const_void_star(1), 0, _tx_metadata, 1.0);
         }
       }
+
+      _tx_barrier.wait();
 
       // RX: Stop streaming and empty the buffers
       for (size_t i = 0; i < _rx_stream.size(); i++) {

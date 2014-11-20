@@ -26,6 +26,7 @@
 #include <boost/thread/mutex.hpp>
 #include <gnuradio/uhd/rfnoc_streamer.h>
 #include <uhd/usrp/multi_usrp.hpp>
+#include <uhd/utils/atomic.hpp>
 #include <uhd/usrp/rfnoc/block_ctrl_base.hpp>
 
 namespace gr {
@@ -103,6 +104,14 @@ namespace gr {
       size_t _out_vlen;
       const bool _align_inputs;
       const bool _align_outputs;
+
+      // Multi-Streamer Sync
+      //! Counts the number of instantiations of this block
+      static size_t _n_streamers;
+      static ::uhd::reusable_barrier _tx_barrier;
+      static ::uhd::reusable_barrier _rx_barrier;
+      static boost::recursive_mutex s_setup_mutex;
+
     };
   } // namespace uhd
 } // namespace gr
