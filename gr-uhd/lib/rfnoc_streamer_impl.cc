@@ -38,7 +38,7 @@
 namespace gr {
   namespace uhd {
 
-    size_t rfnoc_streamer_impl::_n_streamers = 0;
+    std::map<std::string, bool> rfnoc_streamer_impl::_active_streamers;
     ::uhd::reusable_barrier rfnoc_streamer_impl::_tx_barrier;
     ::uhd::reusable_barrier rfnoc_streamer_impl::_rx_barrier;
     boost::recursive_mutex rfnoc_streamer_impl::s_setup_mutex;
@@ -79,14 +79,6 @@ namespace gr {
       _align_inputs(align_inputs),
       _align_outputs(align_outputs)
     {
-      {
-        boost::recursive_mutex::scoped_lock lock(s_setup_mutex);
-        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting up RFNoC streamer #%d") % _n_streamers));
-        _n_streamers++;
-        _tx_barrier.resize(_n_streamers);
-        _rx_barrier.resize(_n_streamers);
-      }
-
       _dev = dev->get_device();
       _blk_ctrl = dev->get_device()->get_device3()->find_block_ctrl(block_id);
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting args on %s (%s)") % _blk_ctrl->get_block_id() % _stream_args.args.to_string()));
@@ -250,10 +242,29 @@ namespace gr {
       return WORK_CALLED_PRODUCE;
     }
 
+    bool rfnoc_streamer_impl::check_topology(int ninputs, int noutputs)
+    {
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("check_topology()")));
+      {
+        boost::recursive_mutex::scoped_lock lock(s_setup_mutex);
+        std::string blk_id = _blk_ctrl->get_block_id().get();
+        if (ninputs || noutputs) {
+          _active_streamers[blk_id] = true;
+        } else if (_active_streamers.count(blk_id)) {
+          _active_streamers.erase(blk_id);
+        }
+        GR_LOG_DEBUG(d_debug_logger, str(boost::format("RFNoC blocks with streaming ports: %d") % _active_streamers.size()));
+        _tx_barrier.resize(_active_streamers.size());
+        _rx_barrier.resize(_active_streamers.size());
+      }
+
+      // TODO: Check if ninputs and noutputs match the blocks io signatures.
+      return true;
+    }
+
     bool rfnoc_streamer_impl::start()
     {
       boost::recursive_mutex::scoped_lock lock(d_mutex);
-
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("start()")));
 
       size_t ninputs = detail()->ninputs();
@@ -328,7 +339,6 @@ namespace gr {
         }
       }
 
-
       // Wait for all RFNoC streamers to have set up their rx streamers
       _rx_barrier.wait();
 
@@ -341,7 +351,6 @@ namespace gr {
         }
       }
 
-      GR_LOG_DEBUG(d_debug_logger, str(boost::format("rx antenna is: %s") % _dev->get_rx_antenna()));
       return true;
     }
 

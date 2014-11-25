@@ -28,6 +28,7 @@
 #include <uhd/usrp/multi_usrp.hpp>
 #include <uhd/utils/atomic.hpp>
 #include <uhd/usrp/rfnoc/block_ctrl_base.hpp>
+#include <map>
 
 namespace gr {
   namespace uhd {
@@ -60,6 +61,7 @@ namespace gr {
           gr_vector_void_star &output_items
       );
 
+      bool check_topology(int ninputs, int noutputs);
       bool start();
       bool stop();
 
@@ -107,7 +109,7 @@ namespace gr {
 
       // Multi-Streamer Sync
       //! Counts the number of instantiations of this block
-      static size_t _n_streamers;
+      static std::map<std::string, bool> _active_streamers;
       static ::uhd::reusable_barrier _tx_barrier;
       static ::uhd::reusable_barrier _rx_barrier;
       static boost::recursive_mutex s_setup_mutex;
