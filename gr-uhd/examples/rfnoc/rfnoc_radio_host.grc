@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<?grc format='1' created='3.7.5'?>
+<?grc format='1' created='3.7.6'?>
 <flow_graph>
   <timestamp>Wed Sep 10 20:11:20 2014</timestamp>
   <block>
@@ -96,65 +96,6 @@
     <key>variable_qtgui_range</key>
     <param>
       <key>id</key>
-      <value>rx_freq</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>label</key>
-      <value></value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>1.982e9</value>
-    </param>
-    <param>
-      <key>start</key>
-      <value>1e9</value>
-    </param>
-    <param>
-      <key>stop</key>
-      <value>2e9</value>
-    </param>
-    <param>
-      <key>step</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>widget</key>
-      <value>counter_slider</value>
-    </param>
-    <param>
-      <key>orient</key>
-      <value>Qt.Horizontal</value>
-    </param>
-    <param>
-      <key>min_len</key>
-      <value>200</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value></value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(240, -3)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable_qtgui_range</key>
-    <param>
-      <key>id</key>
       <value>rx_gain</value>
     </param>
     <param>
@@ -211,70 +152,30 @@
     </param>
   </block>
   <block>
-    <key>uhd_rfnoc_streamer_radio</key>
+    <key>variable_uhd_device3</key>
     <param>
       <key>id</key>
-      <value>uhd_rfnoc_streamer_radio_0</value>
+      <value>device3</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>radio_index</key>
-      <value>0</value>
+      <key>dev_addr</key>
+      <value>type=x300</value>
     </param>
     <param>
-      <key>stream_args</key>
-      <value></value>
-    </param>
-    <param>
-      <key>tx_freq</key>
-      <value>1.982e9</value>
-    </param>
-    <param>
-      <key>tx_rate</key>
-      <value>1e6</value>
-    </param>
-    <param>
-      <key>tx_gain</key>
-      <value>20</value>
-    </param>
-    <param>
-      <key>rx_ant</key>
-      <value>"TX/RX"</value>
-    </param>
-    <param>
-      <key>rx_freq</key>
-      <value>rx_freq</value>
-    </param>
-    <param>
-      <key>rx_rate</key>
-      <value>samp_rate</value>
-    </param>
-    <param>
-      <key>rx_gain</key>
-      <value>rx_gain</value>
+      <key>dev_args</key>
+      <value>""</value>
     </param>
     <param>
       <key>alias</key>
       <value></value>
     </param>
     <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
       <key>_coordinate</key>
-      <value>(-8, 151)</value>
+      <value>(488, -4)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -304,12 +205,16 @@
       <value>1024</value>
     </param>
     <param>
+      <key>freqhalf</key>
+      <value>True</value>
+    </param>
+    <param>
       <key>wintype</key>
       <value>firdes.WIN_BLACKMAN_hARRIS</value>
     </param>
     <param>
       <key>fc</key>
-      <value>0</value>
+      <value>rx_freq</value>
     </param>
     <param>
       <key>bw</key>
@@ -350,6 +255,22 @@
     <param>
       <key>showports</key>
       <value>True</value>
+    </param>
+    <param>
+      <key>tr_mode</key>
+      <value>qtgui.TRIG_MODE_FREE</value>
+    </param>
+    <param>
+      <key>tr_level</key>
+      <value>0.0</value>
+    </param>
+    <param>
+      <key>tr_chan</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>tr_tag</key>
+      <value>""</value>
     </param>
     <param>
       <key>label1</key>
@@ -537,22 +458,50 @@
     </param>
   </block>
   <block>
-    <key>variable_uhd_device3</key>
+    <key>variable_qtgui_range</key>
     <param>
       <key>id</key>
-      <value>device3</value>
+      <value>rx_freq</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>dev_addr</key>
-      <value>type=x300</value>
+      <key>label</key>
+      <value></value>
     </param>
     <param>
-      <key>dev_args</key>
-      <value>""</value>
+      <key>value</key>
+      <value>1.982e9</value>
+    </param>
+    <param>
+      <key>start</key>
+      <value>1e9</value>
+    </param>
+    <param>
+      <key>stop</key>
+      <value>2.5e9</value>
+    </param>
+    <param>
+      <key>step</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>widget</key>
+      <value>counter_slider</value>
+    </param>
+    <param>
+      <key>orient</key>
+      <value>Qt.Horizontal</value>
+    </param>
+    <param>
+      <key>min_len</key>
+      <value>200</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value></value>
     </param>
     <param>
       <key>alias</key>
@@ -560,7 +509,78 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(488, -4)</value>
+      <value>(240, -3)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>uhd_rfnoc_streamer_radio</key>
+    <param>
+      <key>id</key>
+      <value>uhd_rfnoc_streamer_radio_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>radio_index</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>stream_args</key>
+      <value></value>
+    </param>
+    <param>
+      <key>tx_freq</key>
+      <value>1.982e9</value>
+    </param>
+    <param>
+      <key>tx_rate</key>
+      <value>1e6</value>
+    </param>
+    <param>
+      <key>tx_gain</key>
+      <value>20</value>
+    </param>
+    <param>
+      <key>rx_ant</key>
+      <value>"TX/RX"</value>
+    </param>
+    <param>
+      <key>rx_freq</key>
+      <value>rx_freq</value>
+    </param>
+    <param>
+      <key>rx_rate</key>
+      <value>samp_rate</value>
+    </param>
+    <param>
+      <key>rx_gain</key>
+      <value>rx_gain</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(-8, 151)</value>
     </param>
     <param>
       <key>_rotation</key>
