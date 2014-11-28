@@ -81,6 +81,9 @@ namespace gr {
     {
       _dev = dev->get_device();
       _blk_ctrl = dev->get_device()->get_device3()->find_block_ctrl(block_id);
+      if (not _blk_ctrl) {
+        throw std::runtime_error(str(boost::format("Cannot find a block for ID: %s") % block_id));
+      }
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("Setting args on %s (%s)") % _blk_ctrl->get_block_id() % _stream_args.args.to_string()));
       int gr_vlen = _stream_args.args.cast<int>("gr_vlen", 1);
       if (_stream_args.args.has_key("gr_vlen")) {
