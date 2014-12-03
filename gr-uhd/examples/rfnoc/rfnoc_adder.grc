@@ -631,7 +631,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(1040, 152)</value>
+      <value>(792, 152)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -674,93 +674,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(752, 184)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>uhd_rfnoc_streamer_fifo</key>
-    <param>
-      <key>id</key>
-      <value>uhd_rfnoc_streamer_fifo_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>block_index</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>grvlen</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(520, 216)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>uhd_rfnoc_streamer_fifo</key>
-    <param>
-      <key>id</key>
-      <value>uhd_rfnoc_streamer_fifo_1</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>block_index</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>grvlen</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(520, 288)</value>
+      <value>(504, 184)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -831,10 +745,16 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>uhd_rfnoc_streamer_adder_0</source_block_id>
+    <source_block_id>blocks_throttle_0</source_block_id>
+    <sink_block_id>uhd_rfnoc_streamer_adder_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>blocks_throttle_0</source_block_id>
     <sink_block_id>qtgui_time_sink_x_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>1</sink_key>
+    <sink_key>0</sink_key>
   </connection>
   <connection>
     <source_block_id>uhd_rfnoc_streamer_adder_0</source_block_id>
@@ -843,33 +763,15 @@
     <sink_key>2</sink_key>
   </connection>
   <connection>
-    <source_block_id>blocks_throttle_0</source_block_id>
+    <source_block_id>uhd_rfnoc_streamer_adder_0</source_block_id>
     <sink_block_id>qtgui_time_sink_x_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>uhd_rfnoc_streamer_fifo_0</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_adder_0</sink_block_id>
-    <source_key>out_f</source_key>
-    <sink_key>in_f0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>uhd_rfnoc_streamer_fifo_1</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_adder_0</sink_block_id>
-    <source_key>out_f</source_key>
-    <sink_key>in_f1</sink_key>
+    <sink_key>1</sink_key>
   </connection>
   <connection>
     <source_block_id>blocks_throttle_0</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_fifo_0</sink_block_id>
+    <sink_block_id>uhd_rfnoc_streamer_adder_0</sink_block_id>
     <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>blocks_throttle_0</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_fifo_1</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
+    <sink_key>1</sink_key>
   </connection>
 </flow_graph>
