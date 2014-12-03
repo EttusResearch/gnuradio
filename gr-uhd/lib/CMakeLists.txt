@@ -47,11 +47,11 @@ link_directories(${LOG4CPP_LIBRARY_DIRS})
 ########################################################################
 list(APPEND gr_uhd_sources
     usrp_source_impl.cc
-    rfnoc_source_impl.cc
+    #rfnoc_source_impl.cc
     usrp_sink_impl.cc
     amsg_source_impl.cc
     device3.cc
-    rfnoc_streamer_impl.cc
+    #rfnoc_streamer_impl.cc
 )
 
 #Add Windows DLL resource file if using MSVC

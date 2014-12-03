@@ -25,7 +25,14 @@
 #define INCLUDED_UHD_DEVICE3_H
 
 #include <gnuradio/uhd/api.h>
-#include <uhd/usrp/multi_usrp.hpp>
+
+namespace uhd {
+  namespace usrp {
+    class multi_usrp;
+  }
+
+  class device_addr_t;
+}
 
 namespace gr {
   namespace uhd {
@@ -40,7 +47,7 @@ class UHD_API device3
   virtual ~device3() {};
 
   //! Return a pointer to the underlying multi_usrp device
-  virtual ::uhd::usrp::multi_usrp::sptr get_device(void) = 0;
+  virtual boost::shared_ptr< ::uhd::usrp::multi_usrp > get_device(void) = 0;
 
   virtual void connect(const std::string &block1, size_t src_block_port, const std::string block2, size_t dst_block_port) = 0;
 

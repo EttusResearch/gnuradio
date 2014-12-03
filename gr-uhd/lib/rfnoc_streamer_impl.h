@@ -27,6 +27,7 @@
 #include <gnuradio/uhd/rfnoc_streamer.h>
 #include <uhd/usrp/multi_usrp.hpp>
 #include <uhd/utils/atomic.hpp>
+#include <uhd/usrp/multi_usrp.hpp>
 #include <uhd/usrp/rfnoc/block_ctrl_base.hpp>
 #include <map>
 

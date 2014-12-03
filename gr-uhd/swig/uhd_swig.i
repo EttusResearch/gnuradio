@@ -133,14 +133,14 @@
 ////////////////////////////////////////////////////////////////////////
 // block magic
 ////////////////////////////////////////////////////////////////////////
-%include <gnuradio/uhd/rfnoc_source.h>
+//%include <gnuradio/uhd/rfnoc_source.h>
 %include <gnuradio/uhd/usrp_source.h>
 %include <gnuradio/uhd/usrp_sink.h>
 %include <gnuradio/uhd/amsg_source.h>
 %include <gnuradio/uhd/device3.h>
 %include <gnuradio/uhd/rfnoc_streamer.h>
 
-GR_SWIG_BLOCK_MAGIC2(uhd, rfnoc_source)
+//GR_SWIG_BLOCK_MAGIC2(uhd, rfnoc_source)
 GR_SWIG_BLOCK_MAGIC2(uhd, usrp_source)
 GR_SWIG_BLOCK_MAGIC2(uhd, usrp_sink)
 GR_SWIG_BLOCK_MAGIC2(uhd, amsg_source)

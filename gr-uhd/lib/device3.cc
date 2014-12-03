@@ -27,6 +27,7 @@
 #include <gnuradio/io_signature.h>
 #include <gnuradio/uhd/device3.h>
 #include "gr_uhd_common.h"
+#include <uhd/usrp/multi_usrp.hpp>
 
 using namespace gr::uhd;
 

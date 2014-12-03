@@ -27,6 +27,7 @@
 #include <gnuradio/uhd/api.h>
 #include <gnuradio/block.h>
 #include <gnuradio/uhd/device3.h>
+#include <uhd/stream.hpp>
 
 namespace gr {
   namespace uhd {
