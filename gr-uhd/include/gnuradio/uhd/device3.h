@@ -25,14 +25,15 @@
 #define INCLUDED_UHD_DEVICE3_H
 
 #include <gnuradio/uhd/api.h>
+#include <uhd/types/device_addr.hpp>
 
+#ifndef INCLUDED_UHD_USRP_MULTI_USRP_HPP
 namespace uhd {
   namespace usrp {
     class multi_usrp;
   }
-
-  class device_addr_t;
 }
+#endif
 
 namespace gr {
   namespace uhd {

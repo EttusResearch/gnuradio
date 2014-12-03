@@ -50,7 +50,7 @@
 // block headers
 ////////////////////////////////////////////////////////////////////////
 %{
-#include <gnuradio/uhd/rfnoc_source.h>
+//#include <gnuradio/uhd/rfnoc_source.h>
 #include <gnuradio/uhd/usrp_source.h>
 #include <gnuradio/uhd/usrp_sink.h>
 #include <gnuradio/uhd/amsg_source.h>

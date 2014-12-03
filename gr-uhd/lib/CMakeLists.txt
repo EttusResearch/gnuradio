@@ -51,7 +51,7 @@ list(APPEND gr_uhd_sources
     usrp_sink_impl.cc
     amsg_source_impl.cc
     device3.cc
-    #rfnoc_streamer_impl.cc
+    rfnoc_streamer_impl.cc
 )
 
 #Add Windows DLL resource file if using MSVC
