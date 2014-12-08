@@ -83,34 +83,18 @@
   <sink>
     <name>in</name>
     <type>$type.type</type>
+    <domain>rfnoc</domain>
     <nports>2</nports>
-    <optional>1</optional>
-  </sink>
-  <sink>
-    <name>in_f</name>
-    <type>rfnoc</type>
-    <nports>2</nports>
-    <optional>1</optional>
   </sink>
 
   <source>
     <name>sum</name>
     <type>$type.type</type>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </source>
   <source>
     <name>diff</name>
     <type>$type.type</type>
-    <optional>1</optional>
-  </source>
-  <source>
-    <name>sum_f</name>
-    <type>rfnoc</type>
-    <optional>1</optional>
-  </source>
-  <source>
-    <name>diff_f</name>
-    <type>rfnoc</type>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </source>
 </block>

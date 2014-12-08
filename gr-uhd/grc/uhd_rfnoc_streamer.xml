@@ -66,25 +66,13 @@
     <name>in</name>
     <type>complex</type>
     <nports>$ninputs</nports>
-    <optional>1</optional>
-  </sink>
-  <sink>
-    <name>in_f</name>
-    <type>rfnoc</type>
-    <nports>$ninputs</nports>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </sink>
 
   <source>
     <name>out</name>
     <type>complex</type>
     <nports>$noutputs</nports>
-    <optional>1</optional>
-  </source>
-  <source>
-    <name>out_f</name>
-    <type>rfnoc</type>
-    <nports>$noutputs</nports>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </source>
 </block>

@@ -89,23 +89,13 @@ self.$(id).set_window(np.add(np.multiply($coeffs,2**16), $coeffs))</make>
     <name>in</name>
     <type>complex</type>
     <vlen>$coeffs_len</vlen>
-    <optional>1</optional>
-  </sink>
-  <sink>
-    <name>in_f</name>
-    <type>rfnoc</type>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </sink>
 
   <source>
     <name>out</name>
     <type>complex</type>
     <vlen>$coeffs_len</vlen>
-    <optional>1</optional>
-  </source>
-  <source>
-    <name>out_f</name>
-    <type>rfnoc</type>
-    <optional>1</optional>
+    <domain>rfnoc</domain>
   </source>
 </block>
