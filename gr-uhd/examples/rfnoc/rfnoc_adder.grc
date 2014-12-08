@@ -639,49 +639,6 @@
     </param>
   </block>
   <block>
-    <key>uhd_rfnoc_streamer_adder</key>
-    <param>
-      <key>id</key>
-      <value>uhd_rfnoc_streamer_adder_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>block_index</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>fc32</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(504, 184)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>blocks_throttle</key>
     <param>
       <key>id</key>
@@ -726,6 +683,49 @@
     <param>
       <key>_coordinate</key>
       <value>(224, 147)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>uhd_rfnoc_streamer_adder</key>
+    <param>
+      <key>id</key>
+      <value>uhd_rfnoc_streamer_adder_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>block_index</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>fc32</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(512, 184)</value>
     </param>
     <param>
       <key>_rotation</key>

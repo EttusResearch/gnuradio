@@ -3,18 +3,54 @@
 <flow_graph>
   <timestamp>Fri Nov  7 10:40:33 2014</timestamp>
   <block>
-    <key>variable</key>
+    <key>options</key>
     <param>
       <key>id</key>
-      <value>samp_rate</value>
+      <value>rfnoc_fir</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>value</key>
-      <value>1e6</value>
+      <key>title</key>
+      <value></value>
+    </param>
+    <param>
+      <key>author</key>
+      <value></value>
+    </param>
+    <param>
+      <key>description</key>
+      <value></value>
+    </param>
+    <param>
+      <key>window_size</key>
+      <value>1280, 1024</value>
+    </param>
+    <param>
+      <key>generate_options</key>
+      <value>qt_gui</value>
+    </param>
+    <param>
+      <key>category</key>
+      <value>Custom</value>
+    </param>
+    <param>
+      <key>run_options</key>
+      <value>prompt</value>
+    </param>
+    <param>
+      <key>run</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>max_nouts</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>realtime_scheduling</key>
+      <value></value>
     </param>
     <param>
       <key>alias</key>
@@ -22,7 +58,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(8, 75)</value>
+      <value>(-8, -4)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -50,6 +86,33 @@
     <param>
       <key>_coordinate</key>
       <value>(104, 75)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>samp_rate</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>1e6</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(8, 75)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -148,69 +211,6 @@
     <param>
       <key>_coordinate</key>
       <value>(336, 195)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>options</key>
-    <param>
-      <key>id</key>
-      <value>rfnoc_fir</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>title</key>
-      <value></value>
-    </param>
-    <param>
-      <key>author</key>
-      <value></value>
-    </param>
-    <param>
-      <key>description</key>
-      <value></value>
-    </param>
-    <param>
-      <key>window_size</key>
-      <value>1280, 1024</value>
-    </param>
-    <param>
-      <key>generate_options</key>
-      <value>qt_gui</value>
-    </param>
-    <param>
-      <key>category</key>
-      <value>Custom</value>
-    </param>
-    <param>
-      <key>run_options</key>
-      <value>prompt</value>
-    </param>
-    <param>
-      <key>run</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>max_nouts</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>realtime_scheduling</key>
-      <value></value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(-8, -4)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -693,49 +693,6 @@
     </param>
   </block>
   <block>
-    <key>uhd_rfnoc_streamer_fir</key>
-    <param>
-      <key>id</key>
-      <value>uhd_rfnoc_streamer_fir_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>taps</key>
-      <value>filter_coeff</value>
-    </param>
-    <param>
-      <key>block_index</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>alias</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(720, 296)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>uhd_rfnoc_streamer_radio</key>
     <param>
       <key>id</key>
@@ -800,6 +757,49 @@
     <param>
       <key>_coordinate</key>
       <value>(24, 415)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>uhd_rfnoc_streamer_fifo</key>
+    <param>
+      <key>id</key>
+      <value>uhd_rfnoc_streamer_fifo_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>block_index</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>grvlen</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(520, 195)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1074,7 +1074,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(960, 276)</value>
+      <value>(944, 180)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1082,22 +1082,22 @@
     </param>
   </block>
   <block>
-    <key>uhd_rfnoc_streamer_fifo</key>
+    <key>uhd_rfnoc_streamer_fir</key>
     <param>
       <key>id</key>
-      <value>uhd_rfnoc_streamer_fifo_0</value>
+      <value>uhd_rfnoc_streamer_fir_0</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>block_index</key>
-      <value>0</value>
+      <key>taps</key>
+      <value>filter_coeff</value>
     </param>
     <param>
-      <key>grvlen</key>
-      <value>1</value>
+      <key>block_index</key>
+      <value>0</value>
     </param>
     <param>
       <key>alias</key>
@@ -1117,7 +1117,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(520, 200)</value>
+      <value>(704, 188)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1129,18 +1129,6 @@
     <sink_block_id>uhd_rfnoc_streamer_fifo_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>uhd_rfnoc_streamer_fifo_0</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_fir_0</sink_block_id>
-    <source_key>out_f</source_key>
-    <sink_key>in_f</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>uhd_rfnoc_streamer_radio_0</source_block_id>
-    <sink_block_id>uhd_rfnoc_streamer_fir_0</sink_block_id>
-    <source_key>out_f</source_key>
-    <sink_key>in_f</sink_key>
   </connection>
   <connection>
     <source_block_id>analog_noise_source_x_0</source_block_id>
@@ -1157,6 +1145,12 @@
   <connection>
     <source_block_id>blocks_add_xx_0</source_block_id>
     <sink_block_id>blocks_throttle_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>uhd_rfnoc_streamer_fifo_0</source_block_id>
+    <sink_block_id>uhd_rfnoc_streamer_fir_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
