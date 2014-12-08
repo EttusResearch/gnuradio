@@ -65,7 +65,6 @@ CORE_TYPES = ( #name, key, sizeof, color
     ('Integer 8', 's8', 1, '#FF66FF'),
     ('Message Queue', 'msg', 0, '#777777'),
     ('Async Message', 'message', 0, '#C0C0C0'),
-    ('RFNoC Connection', 'rfnoc', 0, '#FDFDFD'),
     ('Bus Connection', 'bus', 0, '#FFFFFF'),
     ('Wildcard', '', 0, '#FFFFFF'),
 )
