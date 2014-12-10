@@ -37,11 +37,19 @@ GEN_BLOCK_XML(gen_uhd_usrp_blocks.py    uhd_usrp_sink.xml)
 
 add_custom_target(uhd_grc_xml_blocks ALL DEPENDS ${xml_blocks})
 
-file(GLOB xml_glob "*.xml")
-
 install(FILES
     ${xml_blocks}
-    ${xml_glob}
     DESTINATION ${GRC_BLOCKS_DIR}
     COMPONENT "uhd_python"
 )
+
+if(UHD_RFNOC_FOUND)
+    file(GLOB rfnoc_xml_glob "uhd_rfnoc_*.xml")
+    install(FILES
+        rfnoc_domain.xml
+        uhd_device3.xml
+        ${rfnoc_xml_glob}
+        DESTINATION ${GRC_BLOCKS_DIR}
+        COMPONENT "uhd_python"
+    )
+endif(UHD_RFNOC_FOUND)

@@ -47,12 +47,18 @@ link_directories(${LOG4CPP_LIBRARY_DIRS})
 ########################################################################
 list(APPEND gr_uhd_sources
     usrp_source_impl.cc
-    #rfnoc_source_impl.cc
     usrp_sink_impl.cc
     amsg_source_impl.cc
-    device3.cc
-    rfnoc_streamer_impl.cc
 )
+
+if(UHD_RFNOC_FOUND)
+    list(APPEND gr_uhd_sources
+        device3.cc
+        rfnoc_block.cc
+        rfnoc_common.cc
+        rfnoc_fir_cci_impl.cc
+    )
+endif(UHD_RFNOC_FOUND)
 
 #Add Windows DLL resource file if using MSVC
 if(MSVC)

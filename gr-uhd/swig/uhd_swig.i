@@ -44,19 +44,23 @@
 ////////////////////////////////////////////////////////////////////////
 %ignore gr::uhd::usrp_sink::get_device;
 %ignore gr::uhd::usrp_source::get_device;
-%ignore gr::uhd::device3::get_device;
 
 ////////////////////////////////////////////////////////////////////////
 // block headers
 ////////////////////////////////////////////////////////////////////////
 %{
-//#include <gnuradio/uhd/rfnoc_source.h>
 #include <gnuradio/uhd/usrp_source.h>
 #include <gnuradio/uhd/usrp_sink.h>
 #include <gnuradio/uhd/amsg_source.h>
+%}
+
+#ifdef GR_HAVE_UHD_RFNOC
+%ignore gr::uhd::device3::get_device;
+%{
 #include <gnuradio/uhd/device3.h>
 #include <gnuradio/uhd/rfnoc_streamer.h>
 %}
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // used types
@@ -133,19 +137,21 @@
 ////////////////////////////////////////////////////////////////////////
 // block magic
 ////////////////////////////////////////////////////////////////////////
-//%include <gnuradio/uhd/rfnoc_source.h>
 %include <gnuradio/uhd/usrp_source.h>
 %include <gnuradio/uhd/usrp_sink.h>
 %include <gnuradio/uhd/amsg_source.h>
-%include <gnuradio/uhd/device3.h>
-%include <gnuradio/uhd/rfnoc_streamer.h>
 
-//GR_SWIG_BLOCK_MAGIC2(uhd, rfnoc_source)
 GR_SWIG_BLOCK_MAGIC2(uhd, usrp_source)
 GR_SWIG_BLOCK_MAGIC2(uhd, usrp_sink)
 GR_SWIG_BLOCK_MAGIC2(uhd, amsg_source)
+
+#ifdef GR_HAVE_UHD_RFNOC
+%include <gnuradio/uhd/device3.h>
+%include <gnuradio/uhd/rfnoc_streamer.h>
+
 GR_SWIG_BLOCK_MAGIC2(uhd, device3)
 GR_SWIG_BLOCK_MAGIC2(uhd, rfnoc_streamer);
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // device discovery (no need to %include device.hpp)

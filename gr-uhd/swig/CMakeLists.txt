@@ -23,7 +23,12 @@
 include(GrPython)
 include(GrSwig)
 
-set(GR_SWIG_FLAGS -DGR_HAVE_UHD) #needed to parse uhd_swig.i
+# Needed to parse uhd_swig.i:
+if(UHD_RFNOC_FOUND)
+    set(GR_SWIG_FLAGS -DGR_HAVE_UHD -DGR_HAVE_UHD_RFNOC)
+else(UHD_RFNOC_FOUND)
+    set(GR_SWIG_FLAGS -DGR_HAVE_UHD)
+endif(UHD_RFNOC_FOUND)
 
 set(GR_SWIG_INCLUDE_DIRS
     ${GR_UHD_INCLUDE_DIRS}
