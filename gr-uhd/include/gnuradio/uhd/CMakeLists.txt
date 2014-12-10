@@ -32,8 +32,7 @@ install(FILES
 if (UHD_RFNOC_FOUND)
     install(FILES
         device3.h
-        rfnoc_block.h
-        rfnoc_fir_cci.h
+        rfnoc_streamer.h
         DESTINATION ${GR_INCLUDE_DIR}/gnuradio/uhd
         COMPONENT "uhd_devel"
     )

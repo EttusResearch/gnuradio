@@ -54,9 +54,7 @@ list(APPEND gr_uhd_sources
 if(UHD_RFNOC_FOUND)
     list(APPEND gr_uhd_sources
         device3.cc
-        rfnoc_block.cc
-        rfnoc_common.cc
-        rfnoc_fir_cci_impl.cc
+        rfnoc_streamer_impl.cc
     )
 endif(UHD_RFNOC_FOUND)
 
