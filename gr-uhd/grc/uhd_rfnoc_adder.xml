@@ -13,7 +13,7 @@
         args="",
     ),
     2, 2,
-    True, False,
+    True, True,
 )
 </make>
   <param>

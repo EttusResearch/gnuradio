@@ -78,7 +78,7 @@ namespace gr {
           gr_vector_const_void_star &input_items
       );
 
-      void work_rx_a(
+      int work_rx_a(
           int noutput_items,
           gr_vector_void_star &output_items
       );

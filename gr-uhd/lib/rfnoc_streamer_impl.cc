@@ -115,10 +115,6 @@ namespace gr {
       set_input_signature(gr::io_signature::make(0, ninputs, itemsize * _in_vlen));
       set_output_signature(gr::io_signature::make(0, noutputs, itemsize * _out_vlen));
       set_tag_propagation_policy(TPP_DONT);
-
-      if (_align_outputs) {
-        throw std::runtime_error("Alignment of inputs and outputs is not yet supported.\n");
-      }
     }
 
 
@@ -149,7 +145,7 @@ namespace gr {
       // These call produce()
       if (!output_items.empty()) {
         if (_align_outputs) {
-          work_rx_a(noutput_items, output_items);
+          return work_rx_a(noutput_items, output_items);
         } else {
           work_rx_u(noutput_items, output_items);
         }
@@ -174,15 +170,6 @@ namespace gr {
           _tx_metadata,
           1.0
       );
-
-      const gr_complex* in = (const gr_complex *) input_items[0];
-      std::cout << in[0] * 32768.0f << in[1] * 32768.0f << in[2] * 32768.0f << in[3] * 32768.0f << " ... ";
-      std::cout << in[num_sent-4] * 32768.0f << in[num_sent-3] * 32768.0f << in[num_sent-2] * 32768.0f << in[num_sent-1] * 32768.0f << std::endl;
-      in = (const gr_complex *) input_items[1];
-      std::cout << in[0] * 32768.0f << in[1] * 32768.0f << in[2] * 32768.0f << in[3] * 32768.0f << " ... ";
-      std::cout << in[num_sent-4] * 32768.0f << in[num_sent-3] * 32768.0f << in[num_sent-2] * 32768.0f << in[num_sent-1] * 32768.0f << std::endl << std::endl;
-
-      std::cout << ninput_items[0] << "/" << ninput_items[1] << "/" << num_sent / _in_vlen << std::endl << std::endl;
 
       consume_each(num_sent / _in_vlen);
     }
@@ -211,12 +198,39 @@ namespace gr {
       }
     }
 
-    void
+    int
     rfnoc_streamer_impl::work_rx_a(
         int noutput_items,
         gr_vector_void_star &output_items
     ) {
-      throw std::runtime_error("work_rx_a");
+      size_t num_vectors_to_recv = noutput_items;
+      size_t num_samps = _rx_stream[0]->recv(
+          output_items,
+          num_vectors_to_recv * _out_vlen,
+          _rx_metadata, 0.1
+      );
+
+      switch(_rx_metadata.error_code) {
+        case ::uhd::rx_metadata_t::ERROR_CODE_NONE:
+          break;
+
+        case ::uhd::rx_metadata_t::ERROR_CODE_TIMEOUT:
+          //its ok to timeout, perhaps the user is doing finite streaming
+          std::cout << "timeout on chan 0" << std::endl;
+          break;
+
+        case ::uhd::rx_metadata_t::ERROR_CODE_OVERFLOW:
+          // Not much we can do about overruns here
+          std::cout << "overrun on chan 0" << std::endl;
+          break;
+
+        default:
+          std::cout << boost::format("RFNoC Streamer block received error %s (Code: 0x%x)")
+            % _rx_metadata.strerror() % _rx_metadata.error_code << std::endl;
+      }
+
+      // There's no 'produce_each()', unfortunately
+      return num_samps / _out_vlen;
     }
 
     void
@@ -239,7 +253,6 @@ namespace gr {
             _rx_metadata, 0.1
         );
         produce(i, num_samps / _out_vlen);
-        std::cout << "produced: " << num_samps / _out_vlen << std::endl;
 
         switch(_rx_metadata.error_code) {
           case ::uhd::rx_metadata_t::ERROR_CODE_NONE:
@@ -309,7 +322,7 @@ namespace gr {
           GR_LOG_FATAL(d_logger, str(boost::format("Not a sink_block_ctrl_base: %s") % _blk_ctrl->unique_id()));
           return false;
         }
-        if (_align_inputs) {
+        if (_align_inputs) { // Aligned streamers:
           GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating one aligned tx streamer for %d inputs.") % ninputs));
           GR_LOG_DEBUG(d_debug_logger,
               str(boost::format("cpu: %s  otw: %s  args: %s channels.size: %d ") % _stream_args.cpu_format % _stream_args.otw_format % _stream_args.args.to_string() % _stream_args.channels.size()));
@@ -346,17 +359,28 @@ namespace gr {
 
       //////////////////// RX ///////////////////////////////////////////////////////////////
       // Setup RX streamer
-      if (_align_outputs && _rx_stream.empty()) {
-        // Make aligned streamer
-        // tbw
-        assert(false);
-      } else if (!_align_outputs && (_rx_stream.size() != noutputs)) {
-        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating rx streamers for %d outputs.") % noutputs));
+      if (noutputs && _rx_stream.empty()) {
+        // Get a block control for the rx side:
         ::uhd::rfnoc::source_block_ctrl_base::sptr rx_blk_ctrl =
             boost::dynamic_pointer_cast< ::uhd::rfnoc::source_block_ctrl_base >(_blk_ctrl);
-        if (rx_blk_ctrl) {
-          // OK, we have an rx-capable block. Create the streamer:
-          for (size_t i = 0; i < noutputs; i++) {
+        if (!rx_blk_ctrl) {
+          GR_LOG_FATAL(d_logger, str(boost::format("Not a source_block_ctrl_base: %s") % _blk_ctrl->unique_id()));
+          return false;
+        }
+        if (_align_outputs) { // Aligned streamers:
+          GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating one aligned rx streamer for %d outputs.") % noutputs));
+          GR_LOG_DEBUG(d_debug_logger,
+              str(boost::format("cpu: %s  otw: %s  args: %s channels.size: %d ") % _stream_args.cpu_format % _stream_args.otw_format % _stream_args.args.to_string() % _stream_args.channels.size()));
+          assert(noutputs == _stream_args.channels.size());
+          ::uhd::rx_streamer::sptr rx_stream = _dev->get_rx_stream(_stream_args);
+          if (rx_stream) {
+            _rx_stream.push_back(rx_stream);
+          } else {
+            GR_LOG_FATAL(d_logger, str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+            return false;
+          }
+        } else { // Unaligned streamers:
+          for (size_t i = 0; i < size_t(noutputs); i++) {
             _stream_args.channels = std::vector<size_t>(1, i);
             GR_LOG_DEBUG(d_debug_logger, str(boost::format("creating rx streamer with: %s") % _stream_args.args.to_string()));
             ::uhd::rx_streamer::sptr rx_stream = _dev->get_rx_stream(_stream_args);
@@ -364,11 +388,10 @@ namespace gr {
               _rx_stream.push_back(rx_stream);
             }
           }
-        } else {
-          throw std::runtime_error(str(boost::format("Not an source_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
-        }
-        if (_rx_stream.size() != noutputs) {
-          throw std::runtime_error(str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+          if (_rx_stream.size() != size_t(noutputs)) {
+            GR_LOG_FATAL(d_logger, str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+            return false;
+          }
         }
       }
 
