@@ -87,7 +87,7 @@ namespace gr {
       }
       BOOST_FOREACH(const std::string this_block_id, split_block_ids) {
         _blk_ctrls.push_back(
-            _dev->get_device3()->find_block_ctrl< ::uhd::rfnoc::rx_block_ctrl_base >(this_block_id)
+            _dev->get_device3()->find_block_ctrl< ::uhd::rfnoc::source_block_ctrl_base >(this_block_id)
         );
         if (not _blk_ctrls.back()) {
           std::cout << "[GR] Could not find block control for '" << this_block_id << "'" << std::endl;
@@ -97,7 +97,7 @@ namespace gr {
       if (_blk_ctrls.front()->get_block_id().get_block_name() != "Radio") {
         _blk_ctrls.insert(
             _blk_ctrls.begin(),
-            _dev->get_device3()->find_block_ctrl< ::uhd::rfnoc::rx_block_ctrl_base >("Radio_0")
+            _dev->get_device3()->find_block_ctrl< ::uhd::rfnoc::source_block_ctrl_base >("Radio_0")
         );
       }
 

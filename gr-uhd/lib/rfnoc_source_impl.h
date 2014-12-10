@@ -23,7 +23,7 @@
 #include <gnuradio/uhd/rfnoc_source.h>
 #include <uhd/convert.hpp>
 #include <boost/thread/mutex.hpp>
-#include <uhd/usrp/rfnoc/rx_block_ctrl_base.hpp>
+#include <uhd/usrp/rfnoc/source_block_ctrl_base.hpp>
 
 static const pmt::pmt_t TIME_KEY = pmt::string_to_symbol("rx_time");
 static const pmt::pmt_t RATE_KEY = pmt::string_to_symbol("rx_rate");
@@ -121,7 +121,7 @@ namespace gr {
                gr_vector_void_star &output_items);
 
     private:
-      std::vector< ::uhd::rfnoc::rx_block_ctrl_base::sptr > _blk_ctrls;
+      std::vector< ::uhd::rfnoc::source_block_ctrl_base::sptr > _blk_ctrls;
 
       std::vector<boost::uint32_t> _register_settings;
       void _set_registers();

@@ -27,8 +27,8 @@
 #include "rfnoc_streamer_impl.h"
 #include <gnuradio/io_signature.h>
 #include <gnuradio/block_detail.h>
-#include <uhd/usrp/rfnoc/rx_block_ctrl_base.hpp>
-#include <uhd/usrp/rfnoc/tx_block_ctrl_base.hpp>
+#include <uhd/usrp/rfnoc/source_block_ctrl_base.hpp>
+#include <uhd/usrp/rfnoc/sink_block_ctrl_base.hpp>
 #include <uhd/usrp/rfnoc/fir_block_ctrl.hpp>
 #include <uhd/usrp/rfnoc/window_block_ctrl.hpp>
 #include <uhd/convert.hpp>
@@ -97,9 +97,9 @@ namespace gr {
       if (_stream_args.cpu_format == "sc16") {
         itemsize = 2 * 2;
       }
-      ::uhd::rfnoc::stream_sig_t in_sig = _blk_ctrl->get_input_signature(0);
+      ::uhd::rfnoc::stream_sig_t in_sig = boost::dynamic_pointer_cast< ::uhd::rfnoc::sink_block_ctrl_base >(_blk_ctrl)->get_input_signature(0);
       _in_vlen = (in_sig.vlen == 0) ? 1 : in_sig.vlen;
-      ::uhd::rfnoc::stream_sig_t out_sig = _blk_ctrl->get_output_signature(0);
+      ::uhd::rfnoc::stream_sig_t out_sig = boost::dynamic_pointer_cast< ::uhd::rfnoc::source_block_ctrl_base >(_blk_ctrl)->get_output_signature(0);
       _out_vlen = (out_sig.vlen == 0) ? 1 : out_sig.vlen;
 
       if (gr_vlen != 1) {
@@ -285,8 +285,8 @@ namespace gr {
         // Destroy the old streamers, if any:
         _tx_stream.clear();
         // Get a block control for the tx side:
-        ::uhd::rfnoc::tx_block_ctrl_base::sptr tx_blk_ctrl =
-            boost::dynamic_pointer_cast< ::uhd::rfnoc::tx_block_ctrl_base >(_blk_ctrl);
+        ::uhd::rfnoc::sink_block_ctrl_base::sptr tx_blk_ctrl =
+            boost::dynamic_pointer_cast< ::uhd::rfnoc::sink_block_ctrl_base >(_blk_ctrl);
         if (tx_blk_ctrl) {
           // OK, we have a tx-capable block. Create the streamer:
           for (size_t i = 0; i < size_t(ninputs); i++) {
@@ -298,7 +298,7 @@ namespace gr {
             }
           }
         } else {
-          GR_LOG_FATAL(d_logger, str(boost::format("Not a tx_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
+          GR_LOG_FATAL(d_logger, str(boost::format("Not a sink_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
           return false;
         }
         if (_tx_stream.size() != size_t(ninputs)) {
@@ -322,8 +322,8 @@ namespace gr {
         assert(false);
       } else if (!_align_outputs && (_rx_stream.size() != noutputs)) {
         GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating rx streamers for %d outputs.") % noutputs));
-        ::uhd::rfnoc::rx_block_ctrl_base::sptr rx_blk_ctrl =
-            boost::dynamic_pointer_cast< ::uhd::rfnoc::rx_block_ctrl_base >(_blk_ctrl);
+        ::uhd::rfnoc::source_block_ctrl_base::sptr rx_blk_ctrl =
+            boost::dynamic_pointer_cast< ::uhd::rfnoc::source_block_ctrl_base >(_blk_ctrl);
         if (rx_blk_ctrl) {
           // OK, we have an rx-capable block. Create the streamer:
           for (size_t i = 0; i < noutputs; i++) {
@@ -335,7 +335,7 @@ namespace gr {
             }
           }
         } else {
-          throw std::runtime_error(str(boost::format("Not an rx_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
+          throw std::runtime_error(str(boost::format("Not an source_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
         }
         if (_rx_stream.size() != noutputs) {
           throw std::runtime_error(str(boost::format("Can't create rx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
