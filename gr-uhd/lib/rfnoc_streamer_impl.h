@@ -69,20 +69,20 @@ namespace gr {
       void flush(size_t streamer_index);
 
      private:
-      int work_tx_a(
+      void work_tx_a(
           gr_vector_int &ninput_items,
           gr_vector_const_void_star &input_items
       );
-      int work_tx_u(
+      void work_tx_u(
           gr_vector_int &ninput_items,
           gr_vector_const_void_star &input_items
       );
 
-      int work_rx_a(
+      void work_rx_a(
           int noutput_items,
           gr_vector_void_star &output_items
       );
-      int work_rx_u(
+      void work_rx_u(
           int noutput_items,
           gr_vector_void_star &output_items
       );

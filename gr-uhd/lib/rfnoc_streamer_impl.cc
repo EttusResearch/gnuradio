@@ -110,12 +110,13 @@ namespace gr {
         GR_LOG_DEBUG(d_debug_logger, str(boost::format("If stuff doesn't work, remove this setting again!")));
         _in_vlen = _out_vlen = gr_vlen;
       }
+      GR_LOG_DEBUG(d_debug_logger, str(boost::format("GR itemsize == %d") % (itemsize * _in_vlen)));
 
       set_input_signature(gr::io_signature::make(0, ninputs, itemsize * _in_vlen));
       set_output_signature(gr::io_signature::make(0, noutputs, itemsize * _out_vlen));
       set_tag_propagation_policy(TPP_DONT);
 
-      if (_align_inputs || _align_outputs) {
+      if (_align_outputs) {
         throw std::runtime_error("Alignment of inputs and outputs is not yet supported.\n");
       }
     }
@@ -123,6 +124,7 @@ namespace gr {
 
     rfnoc_streamer_impl::~rfnoc_streamer_impl()
     {
+      /* nop */
     }
 
 
@@ -135,16 +137,17 @@ namespace gr {
     ) {
       boost::recursive_mutex::scoped_lock lock(d_mutex);
 
-      // TODO put these in separate threads
-      if (input_items.size()) {
-        if (_align_outputs) {
+      // These call consume()
+      if (!input_items.empty()) {
+        if (_align_inputs) {
           work_tx_a(ninput_items, input_items);
         } else {
           work_tx_u(ninput_items, input_items);
         }
       }
 
-      if (output_items.size()) {
+      // These call produce()
+      if (!output_items.empty()) {
         if (_align_outputs) {
           work_rx_a(noutput_items, output_items);
         } else {
@@ -152,21 +155,39 @@ namespace gr {
         }
       }
 
-      // If this is a sink, we return the number of consumed items, like a
-      // well-behaved little sink block.
       return WORK_CALLED_PRODUCE;
     }
 
-    int
+    void
     rfnoc_streamer_impl::work_tx_a(
         gr_vector_int &ninput_items,
         gr_vector_const_void_star &input_items
     ) {
-      throw std::runtime_error("work_tx_a");
-      return 0;
+      // TODO Figure out why this doesn't work. It looks like the fragmentation logic
+      //  in the tx_streamer is screwing up the packets, they're definitely wrong
+      //  on the wire (checked with wireshark).
+      //size_t num_vectors_to_send = ninput_items[0];
+      size_t num_vectors_to_send = _tx_stream[0]->get_max_num_samps() / _out_vlen;
+      const size_t num_sent = _tx_stream[0]->send(
+          input_items,
+          num_vectors_to_send * _in_vlen,
+          _tx_metadata,
+          1.0
+      );
+
+      const gr_complex* in = (const gr_complex *) input_items[0];
+      std::cout << in[0] * 32768.0f << in[1] * 32768.0f << in[2] * 32768.0f << in[3] * 32768.0f << " ... ";
+      std::cout << in[num_sent-4] * 32768.0f << in[num_sent-3] * 32768.0f << in[num_sent-2] * 32768.0f << in[num_sent-1] * 32768.0f << std::endl;
+      in = (const gr_complex *) input_items[1];
+      std::cout << in[0] * 32768.0f << in[1] * 32768.0f << in[2] * 32768.0f << in[3] * 32768.0f << " ... ";
+      std::cout << in[num_sent-4] * 32768.0f << in[num_sent-3] * 32768.0f << in[num_sent-2] * 32768.0f << in[num_sent-1] * 32768.0f << std::endl << std::endl;
+
+      std::cout << ninput_items[0] << "/" << ninput_items[1] << "/" << num_sent / _in_vlen << std::endl << std::endl;
+
+      consume_each(num_sent / _in_vlen);
     }
 
-    int
+    void
     rfnoc_streamer_impl::work_tx_u(
         gr_vector_int &ninput_items,
         gr_vector_const_void_star &input_items
@@ -188,20 +209,17 @@ namespace gr {
         );
         consume(i, num_sent / _in_vlen);
       }
-
-      return WORK_CALLED_PRODUCE;
     }
 
-    int
+    void
     rfnoc_streamer_impl::work_rx_a(
         int noutput_items,
         gr_vector_void_star &output_items
     ) {
       throw std::runtime_error("work_rx_a");
-      return 0;
     }
 
-    int
+    void
     rfnoc_streamer_impl::work_rx_u(
         int noutput_items,
         gr_vector_void_star &output_items
@@ -221,6 +239,7 @@ namespace gr {
             _rx_metadata, 0.1
         );
         produce(i, num_samps / _out_vlen);
+        std::cout << "produced: " << num_samps / _out_vlen << std::endl;
 
         switch(_rx_metadata.error_code) {
           case ::uhd::rx_metadata_t::ERROR_CODE_NONE:
@@ -241,8 +260,6 @@ namespace gr {
               % _rx_metadata.strerror() % _rx_metadata.error_code << std::endl;
         }
       }
-
-      return WORK_CALLED_PRODUCE;
     }
 
     bool rfnoc_streamer_impl::check_topology(int ninputs, int noutputs)
@@ -274,21 +291,37 @@ namespace gr {
       size_t noutputs = detail()->noutputs();
       GR_LOG_DEBUG(d_debug_logger, str(boost::format("ninputs == %d noutputs == %d") % ninputs % noutputs));
 
+      // If the topology changed, we need to clear the old streamers
+      if (_rx_stream.size() != noutputs) {
+        _rx_stream.clear();
+      }
+      if (_tx_stream.size() != ninputs) {
+        _tx_stream.clear();
+      }
+
       //////////////////// TX ///////////////////////////////////////////////////////////////
       // Setup TX streamer.
-      if (_align_inputs && _tx_stream.empty()) {
-        // Make aligned streamer
-        // tbw
-
-      } else if (!_align_inputs && (_tx_stream.size() != ninputs)) {
-        GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating tx streamers for %d inputs.") % ninputs));
-        // Destroy the old streamers, if any:
-        _tx_stream.clear();
+      if (ninputs && _tx_stream.empty()) {
         // Get a block control for the tx side:
         ::uhd::rfnoc::sink_block_ctrl_base::sptr tx_blk_ctrl =
             boost::dynamic_pointer_cast< ::uhd::rfnoc::sink_block_ctrl_base >(_blk_ctrl);
-        if (tx_blk_ctrl) {
-          // OK, we have a tx-capable block. Create the streamer:
+        if (!tx_blk_ctrl) {
+          GR_LOG_FATAL(d_logger, str(boost::format("Not a sink_block_ctrl_base: %s") % _blk_ctrl->unique_id()));
+          return false;
+        }
+        if (_align_inputs) {
+          GR_LOG_DEBUG(d_debug_logger, str(boost::format("Creating one aligned tx streamer for %d inputs.") % ninputs));
+          GR_LOG_DEBUG(d_debug_logger,
+              str(boost::format("cpu: %s  otw: %s  args: %s channels.size: %d ") % _stream_args.cpu_format % _stream_args.otw_format % _stream_args.args.to_string() % _stream_args.channels.size()));
+          assert(ninputs == _stream_args.channels.size());
+          ::uhd::tx_streamer::sptr tx_stream = _dev->get_tx_stream(_stream_args);
+          if (tx_stream) {
+            _tx_stream.push_back(tx_stream);
+          } else {
+            GR_LOG_FATAL(d_logger, str(boost::format("Can't create tx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+            return false;
+          }
+        } else { // Unaligned streamers:
           for (size_t i = 0; i < size_t(ninputs); i++) {
             _stream_args.channels = std::vector<size_t>(1, i);
             GR_LOG_DEBUG(d_debug_logger, str(boost::format("creating tx streamer with: %s") % _stream_args.args.to_string()));
@@ -297,13 +330,10 @@ namespace gr {
               _tx_stream.push_back(tx_stream);
             }
           }
-        } else {
-          GR_LOG_FATAL(d_logger, str(boost::format("Not a sink_block_ctrl_base: %s") % _blk_ctrl->get_block_id().get()));
-          return false;
-        }
-        if (_tx_stream.size() != size_t(ninputs)) {
-          GR_LOG_FATAL(d_logger, str(boost::format("Can't create tx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
-          return false;
+          if (_tx_stream.size() != size_t(ninputs)) {
+            GR_LOG_FATAL(d_logger, str(boost::format("Can't create tx streamer(s) to: %s") % _blk_ctrl->get_block_id().get()));
+            return false;
+          }
         }
       }
 

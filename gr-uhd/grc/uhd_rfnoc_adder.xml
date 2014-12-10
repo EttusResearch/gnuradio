@@ -9,9 +9,11 @@
     uhd.stream_args(
         cpu_format="$type",
         otw_format="sc16",
+        channels=(0,1),
         args="",
     ),
-    2, 2
+    2, 2,
+    True, False,
 )
 </make>
   <param>
