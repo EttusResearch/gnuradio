@@ -49,6 +49,7 @@ SET(GR_PKG_UHD_EXAMPLES_DIR ${GR_PKG_DATA_DIR}/examples/uhd)
 if(ENABLE_GR_UHD)
 if(UHD_RFNOC_FOUND)
 	message(STATUS "  Enabling RFNoC support.")
+	GR_APPEND_SUBCOMPONENT("rfnoc")
 endif()
 
 ########################################################################
