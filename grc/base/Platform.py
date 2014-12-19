@@ -100,7 +100,7 @@ class Platform(_Element):
                 # print >> sys.stderr, 'Warning: Block validation failed:\n\t%s\n\tIgnoring: %s' % (e, xml_file)
                 pass
             except Exception as e:
-                print >> sys.stderr, 'Warning: Block loading failed:\n\t%s\n\tIgnoring: %s' % (e, xml_file)
+                print >> sys.stderr, 'Warning: XML parsing failed:\n\t%s\n\tIgnoring: %s' % (e, xml_file)
 
     def iter_xml_files(self):
         """Iterator for block descriptions and category trees"""
@@ -139,16 +139,30 @@ class Platform(_Element):
         n = ParseXML.from_file(xml_file).find('domain')
 
         key = n.find('key')
+        if not key:
+            print >> sys.stderr, 'Warning: Domain with emtpy key.\n\tIgnoring: %s' % xml_file
+            return
         if key in self.get_domains():  # test against repeated keys
             print >> sys.stderr, 'Warning: Domain with key "%s" already exists.\n\tIgnoring: %s' % (key, xml_file)
             return
 
         to_bool = lambda s, d: d if s is None else \
             s.lower() not in ('false', 'off', '0', '')
+
+        color = n.find('color') or ''
+        try:
+            import gtk  # ugly, but handy
+            gtk.gdk.color_parse(color)
+        except (ValueError, ImportError):
+            if color:  # no color is okay
+                print >> sys.stderr, 'Warning: Can\'t parse color code "%s" for domain "%s" ' % (color, key)
+                color = None
+
         self._domains[key] = dict(
             name=n.find('name') or key,
             multiple_sinks=to_bool(n.find('multiple_sinks'), True),
             multiple_sources=to_bool(n.find('multiple_sources'), False),
+            color=color
         )
         for connection_n in n.findall('connection'):
             source_domain = connection_n.find('source_domain') or DEFAULT_DOMAIN

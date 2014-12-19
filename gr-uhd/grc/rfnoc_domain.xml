@@ -8,6 +8,7 @@
  <domain>
   <name>RFNoC</name>
   <key>rfnoc</key>
+  <color>#81b35d</color>
   <multiple_sinks>False</multiple_sinks>
   <multiple_sources>False</multiple_sources>
   <connection>
