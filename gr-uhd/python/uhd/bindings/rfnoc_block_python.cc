@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Free Software Foundation, Inc.
+ * Copyright 2022 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
@@ -58,6 +58,58 @@ void bind_rfnoc_block(py::module& m)
              py::arg("input_items"),
              py::arg("output_items"),
              D(rfnoc_block, general_work))
+
+
+        .def("set_bool_property",
+            &rfnoc_block::set_property<bool>,
+            py::arg("name"),
+            py::arg("value"),
+            py::arg("port") = 0)
+
+
+        .def("set_double_property",
+            &rfnoc_block::set_property<double>,
+            py::arg("name"),
+            py::arg("value"),
+            py::arg("port") = 0)
+
+
+        .def("set_int_property",
+            &rfnoc_block::set_property<int>,
+            py::arg("name"),
+            py::arg("value"),
+            py::arg("port") = 0)
+
+
+        .def("set_string_property",
+            &rfnoc_block::set_property<std::string>,
+            py::arg("name"),
+            py::arg("value"),
+            py::arg("port") = 0)
+
+
+        .def("get_bool_property",
+            &rfnoc_block::get_property<bool>,
+            py::arg("name"),
+            py::arg("port") = 0)
+
+
+        .def("get_double_property",
+            &rfnoc_block::get_property<double>,
+            py::arg("name"),
+            py::arg("port") = 0)
+
+            
+        .def("get_int_property",
+            &rfnoc_block::get_property<int>,
+            py::arg("name"),
+            py::arg("port") = 0)
+
+
+        .def("get_string_property",
+            &rfnoc_block::get_property<std::string>,
+            py::arg("name"),
+            py::arg("port") = 0)
 
         ;
 }
