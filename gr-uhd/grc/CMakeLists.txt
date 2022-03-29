@@ -50,6 +50,7 @@ if(ENABLE_UHD_RFNOC)
         uhd_rfnoc_ddc.block.yml
         uhd_rfnoc_duc.block.yml
         uhd_rfnoc_fft.block.yml
+        uhd_rfnoc_fosphor.block.yml
         uhd_rfnoc_graph.block.yml
         uhd_rfnoc_rx_radio.block.yml
         uhd_rfnoc_rx_streamer.block.yml
@@ -58,3 +59,10 @@ if(ENABLE_UHD_RFNOC)
         DESTINATION ${GRC_BLOCKS_DIR}
     )
 endif(ENABLE_UHD_RFNOC)
+
+if(ENABLE_UHD_FOSPHOR)
+    install(FILES
+        uhd_fosphor_display.block.yml
+        DESTINATION ${GRC_BLOCKS_DIR}
+    )
+endif(ENABLE_UHD_FOSPHOR)
