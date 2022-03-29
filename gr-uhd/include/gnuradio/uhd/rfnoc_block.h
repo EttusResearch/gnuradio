@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2020 Free Software Foundation, Inc.
+ * Copyright 2022 Free Software Foundation, Inc.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -68,6 +68,27 @@ public:
     /*! Return the unique ID of the underlying block
      */
     std::string get_unique_id() const;
+
+    //! Set the value of a property of the underlying block
+    //
+    // \param name Name of the property
+    // \param value Value to which to set the property
+    // \param port Port number where the property resides (default 0)
+    template <typename T>
+    void set_property(const std::string& name, const T& value, const size_t port = 0)
+    {
+        d_block_ref->set_property<T>(name, value, port);
+    }
+
+    //! Return the value of a property of the underlying block
+    //
+    // \param name Name of the property
+    // \param port Port number where the property resides (default 0)
+    template <typename T>
+    const T get_property(const std::string& name, const size_t port = 0)
+    {
+        return d_block_ref->get_property<T>(name, port);
+    }
 
     // GNU Radio-specific overrides
 
