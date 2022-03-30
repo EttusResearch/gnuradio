@@ -8,11 +8,25 @@
 ########################################################################
 # Setup library
 ########################################################################
+if(ENABLE_UHD_FOSPHOR)
+    qt5_add_resources(FOSPHOR_RC_SRCS fosphor.qrc)
+    set(CMAKE_AUTOMOC ON)
+    include_directories(
+        ${Qt5Widgets_INCLUDE_DIRS}
+        ${Qt5OpenGL_INCLUDE_DIRS}      
+    )
+endif(ENABLE_UHD_FOSPHOR)
+
 set(LIB_GR_UHD_SOURCES
     amsg_source_impl.cc
     usrp_block_impl.cc
     usrp_sink_impl.cc
     usrp_source_impl.cc
+)
+
+set(LIB_GR_UHD_LIBRARIES
+    gnuradio-runtime
+    UHD::UHD
 )
 
 if(ENABLE_UHD_RFNOC)
@@ -27,13 +41,28 @@ if(ENABLE_UHD_RFNOC)
         rfnoc_tx_radio_impl.cc
         rfnoc_tx_streamer_impl.cc
     )
+
+    list(APPEND LIB_GR_UHD_LIBRARIES
+        Qt5::Core
+        Qt5::Gui
+        Qt5::OpenGL
+    )    
 endif(ENABLE_UHD_RFNOC)
+
+if(ENABLE_UHD_FOSPHOR)
+    list(APPEND LIB_GR_UHD_SOURCES
+        axis.c
+        fosphor_display_impl.cc
+        QFosphorColorMapper.cc
+        QFosphorSurface.cc
+        ${FOSPHOR_RC_SRCS}
+    )
+endif(ENABLE_UHD_FOSPHOR)
 
 add_library(gnuradio-uhd ${LIB_GR_UHD_SOURCES})
 
 target_link_libraries(gnuradio-uhd
-  gnuradio-runtime
-  UHD::UHD
+  ${LIB_GR_UHD_LIBRARIES}
 )
 
 target_include_directories(gnuradio-uhd

@@ -17,11 +17,23 @@ else()
   set(UHD_FOUR_POINT_OH_RFNOC FALSE)
 endif()
 
+find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED QUIET)
+set(QT_FOUND ${Qt5Widgets_FOUND})
+
+GR_PYTHON_CHECK_MODULE("PyQt5" PyQt5 True PYQT5_FOUND)
+
+find_package(Qwt)
 
 ########################################################################
 # Register component
 ########################################################################
 include(GrComponent)
+if(NOT CMAKE_CROSSCOMPILING)
+    set(uhd_fosphor_python_deps
+        PYQT5_FOUND
+    )
+endif(NOT CMAKE_CROSSCOMPILING)
+
 GR_REGISTER_COMPONENT("gr-uhd" ENABLE_GR_UHD
     Boost_FOUND
     UHD_FOUND
@@ -33,9 +45,15 @@ GR_REGISTER_COMPONENT("gr-uhd" ENABLE_GR_UHD
 SET(GR_PKG_UHD_EXAMPLES_DIR ${GR_PKG_DATA_DIR}/examples/uhd)
 
 GR_REGISTER_COMPONENT("gr-uhd UHD 4.0 RFNoC" ENABLE_UHD_RFNOC
-  ENABLE_GR_UHD
-  UHD_FOUR_POINT_OH_RFNOC
-  )
+    ENABLE_GR_UHD
+    UHD_FOUR_POINT_OH_RFNOC
+)
+
+GR_REGISTER_COMPONENT("gr-uhd Fosphor display support" ENABLE_UHD_FOSPHOR
+    QT_FOUND
+    ENABLE_GR_UHD
+    ${uhd_fosphor_python_deps}
+)
 
 ########################################################################
 # Begin conditional configuration
